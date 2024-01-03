@@ -7,11 +7,9 @@
 
 
 import Foundation
+import Fluent
 
-public protocol Client {
-    associatedtype IDValue: Codable, Hashable
-    
-    var id: IDValue { get set }
+public protocol Client: Model {
     var created: Date? { get set }
     var modified: Date? { get set }
     var name: String { get set }

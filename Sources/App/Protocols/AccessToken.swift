@@ -13,6 +13,7 @@ public protocol AccessToken {
     associatedtype User
     associatedtype Client
     associatedtype Scope
+    
     var id: IDValue? { get set }
     var created: Date? { get set }
     var modified: Date? { get set }

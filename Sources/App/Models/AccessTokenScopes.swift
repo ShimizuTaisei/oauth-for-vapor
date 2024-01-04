@@ -13,7 +13,6 @@ import Fluent
 public final class AccessTokenScopes: AccessTokenScope {
     public static var schema: String = "oauth_access_token_scopes"
     public typealias AccessToken = AccessTokens
-    public typealias Scope = Scopes
     
     @ID(key: .id)
     public var id: UUID?

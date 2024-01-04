@@ -13,7 +13,6 @@ import Fluent
 public final class AuthorizationCodeScopes: AuthorizationCodeScope {
     public static var schema: String = "oauth_authorization_code_scopes"
     public typealias AuthorizationCode = AuthorizationCodes
-    public typealias Scope = Scopes
     
     @ID(key: .id)
     public var id: UUID?

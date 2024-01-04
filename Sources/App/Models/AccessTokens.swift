@@ -16,8 +16,6 @@ public macro AccessTokenModel() = #externalMacro(module: "VaporOAuthMacros", typ
 public final class AccessTokens: AccessToken {
     public typealias Client = Clients
     
-    public typealias Scope = Scopes
-    
     public static var schema: String = "oauth_access_tokens"
     public typealias User = UserTeachers
     

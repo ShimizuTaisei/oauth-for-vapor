@@ -14,13 +14,7 @@ public final class AuthorizationCodes: AuthorizationCode {
     public static var schema: String = "oauth_authorization_codes"
     
     public typealias User = UserTeachers
-    
-    public typealias Client = Clients
-    
-    public typealias Scope = Scopes
-    
     public typealias AccessToken = AccessTokens
-    
     public typealias RefreshToken = RefreshTokens
     
     @ID(key: .id)

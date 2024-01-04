@@ -11,8 +11,7 @@ import Fluent
 
 public protocol AuthorizationCodeScope: Model {
     associatedtype AuthorizationCode
-    associatedtype Scope
     
     var authorizationCode: AuthorizationCode { get set }
-    var scope: Scope { get set }
+    var scope: Scopes { get set }
 }

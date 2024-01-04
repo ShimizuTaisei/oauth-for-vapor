@@ -12,7 +12,7 @@ import Fluent
 
 public final class RefreshTokenScopes: RefreshTokenScope {
     public static var schema: String = "oauth_refresh_token_scopes"
-    public typealias Scope = Scopes
+    
     public typealias RefreshToken = RefreshTokens
     
     @ID(key: .id)

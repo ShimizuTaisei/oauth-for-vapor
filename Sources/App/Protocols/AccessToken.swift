@@ -11,8 +11,6 @@ import Fluent
 
 public protocol AccessToken: Model {
     associatedtype User
-    associatedtype Client
-    associatedtype Scope
     
     var created: Date? { get set }
     var modified: Date? { get set }
@@ -20,6 +18,6 @@ public protocol AccessToken: Model {
     var isRevoked: Bool { get set }
     var accessToken: String { get set }
     var user: User { get set }
-    var client: Client { get set }
-    var scopes: [Scope] { get set }
+    var client: Clients { get set }
+    var scopes: [Scopes] { get set }
 }

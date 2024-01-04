@@ -11,8 +11,6 @@ import Fluent
 
 public protocol AuthorizationCode: Model {
     associatedtype User
-    associatedtype Client
-    associatedtype Scope
     associatedtype AccessToken
     associatedtype RefreshToken
     var created: Date? { get set }
@@ -22,9 +20,9 @@ public protocol AuthorizationCode: Model {
     var isUsed: Bool { get set }
     var code: String { get set }
     var redirectURI: String { get set }
-    var client: Client { get set }
+    var client: Clients { get set }
     var user: User { get set }
     var accessToken: AccessToken? { get set }
     var refreshToken: RefreshToken? { get set }
-    var scopes: [Scope] { get set }
+    var scopes: [Scopes] { get set }
 }

@@ -12,13 +12,9 @@ import Fluent
 
 public final class RefreshTokens: RefreshToken {
     public static var schema: String = "oauth_refresh_tokens"
+    
     public typealias User = UserTeachers
-    
     public typealias AccessToken = AccessTokens
-    
-    public typealias Client = Clients
-    
-    public typealias Scope = Scopes
     
     @ID(key: .id)
     public var id: UUID?

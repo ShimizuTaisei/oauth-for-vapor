@@ -21,7 +21,3 @@ public final class AccessTokens: AccessToken {
     @Parent(key: "user")
     public var user: UserTeachers
 }
-
-public final class UserStudents {
-    
-}

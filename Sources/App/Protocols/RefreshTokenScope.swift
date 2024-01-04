@@ -7,13 +7,12 @@
 
 
 import Foundation
+import Fluent
 
-public protocol RefreshTokenScope {
-    associatedtype IDValue: Codable, Hashable
+public protocol RefreshTokenScope: Model {
     associatedtype RefreshToken
     associatedtype Scope
     
-    var id: IDValue { get set }
     var refreshToken: RefreshToken { get set }
     var scope: Scope { get set }
 }

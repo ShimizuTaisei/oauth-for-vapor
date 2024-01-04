@@ -11,8 +11,7 @@ import Fluent
 
 public protocol RefreshTokenScope: Model {
     associatedtype RefreshToken
-    associatedtype Scope
     
     var refreshToken: RefreshToken { get set }
-    var scope: Scope { get set }
+    var scope: Scopes { get set }
 }

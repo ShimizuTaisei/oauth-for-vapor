@@ -11,8 +11,7 @@ import Fluent
 
 public protocol AccessTokenScope: Model {
     associatedtype AccessToken
-    associatedtype Scope
     
     var accessToken: AccessToken { get set }
-    var scope: Scope { get set }
+    var scope: Scopes { get set }
 }

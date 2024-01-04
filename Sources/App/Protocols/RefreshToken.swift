@@ -12,8 +12,7 @@ import Fluent
 public protocol RefreshToken: Model {
     associatedtype User
     associatedtype AccessToken
-    associatedtype Client
-    associatedtype Scope
+    
     var created: Date? { get set }
     var modified: Date? { get set }
     var expired: Date? { get set }
@@ -21,6 +20,6 @@ public protocol RefreshToken: Model {
     var refreshToken: String { get set }
     var accessToken: AccessToken { get set }
     var user: User { get set }
-    var client: Client { get set }
-    var scopes: [Scope] { get set }
+    var client: Clients { get set }
+    var scopes: [Scopes] { get set }
 }

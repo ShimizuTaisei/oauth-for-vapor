@@ -24,7 +24,7 @@ public protocol AuthorizationCode: Model {
     var redirectURI: String { get set }
     var client: Client { get set }
     var user: User { get set }
-    var accessToken: AccessToken { get set }
-    var refreshToken: RefreshToken { get set }
+    var accessToken: AccessToken? { get set }
+    var refreshToken: RefreshToken? { get set }
     var scopes: [Scope] { get set }
 }

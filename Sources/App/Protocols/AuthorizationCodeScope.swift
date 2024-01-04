@@ -7,13 +7,12 @@
 
 
 import Foundation
+import Fluent
 
-public protocol AuthorizationCodeScope {
-    associatedtype IDValue: Codable, Hashable
+public protocol AuthorizationCodeScope: Model {
     associatedtype AuthorizationCode
     associatedtype Scope
     
-    var id: IDValue { get set }
     var authorizationCode: AuthorizationCode { get set }
     var scope: Scope { get set }
 }

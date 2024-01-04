@@ -28,6 +28,7 @@ public final class Scopes: Scope {
     @OptionalField(key: "explanation")
     public var explanation: String?
     
+    
     public init(name: String, explanation: String?) {
         self.name = name
         self.explanation = explanation

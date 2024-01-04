@@ -86,8 +86,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/mysql-kit.git",
       "state" : {
-        "revision" : "5904a6f9148610bb49762392242f9ef72117f3e7",
-        "version" : "4.7.1"
+        "revision" : "a9375f89057e6b2f86878b33312a33f9ba039819",
+        "version" : "4.7.2"
       }
     },
     {
@@ -237,7 +237,7 @@
     {
       "identity" : "swift-syntax",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-syntax.git",
+      "location" : "https://github.com/apple/swift-syntax",
       "state" : {
         "revision" : "6ad4ea24b01559dde0773e3d091f1b9e36175036",
         "version" : "509.0.2"
@@ -248,8 +248,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/vapor.git",
       "state" : {
-        "revision" : "67fe736c37b0ad958b9d248f010cff6c1baa5c3a",
-        "version" : "4.89.3"
+        "revision" : "6db3d917b5ce5024a84eb265ef65691383305d70",
+        "version" : "4.90.0"
       }
     },
     {

@@ -1,5 +1,6 @@
 // swift-tools-version:5.9
 import PackageDescription
+import CompilerPluginSupport
 
 let package = Package(
     name: "VaporOAuth",
@@ -15,11 +16,22 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-mysql-driver.git", from: "4.0.0"),
         // 🍃 An expressive, performant, and extensible templating language built for Swift.
         .package(url: "https://github.com/vapor/leaf.git", from: "4.2.4"),
+        .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.2"),
     ],
     targets: [
+        .macro(
+            name: "VaporOAuthMacros",
+            dependencies: [
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                .product(name: "Fluent", package: "fluent"),
+                .product(name: "FluentMySQLDriver", package: "fluent-mysql-driver"),
+                .product(name: "Vapor", package: "vapor"),
+            ]),
         .executableTarget(
             name: "App",
             dependencies: [
+                "VaporOAuthMacros",
                 .product(name: "Fluent", package: "fluent"),
                 .product(name: "FluentMySQLDriver", package: "fluent-mysql-driver"),
                 .product(name: "Leaf", package: "leaf"),
@@ -35,6 +47,6 @@ let package = Package(
             .product(name: "Fluent", package: "Fluent"),
             .product(name: "FluentMySQLDriver", package: "fluent-mysql-driver"),
             .product(name: "Leaf", package: "leaf"),
-        ])
+        ]),
     ]
 )

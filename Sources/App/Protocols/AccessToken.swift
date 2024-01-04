@@ -21,5 +21,5 @@ public protocol AccessToken: Model {
     var accessToken: String { get set }
     var user: User { get set }
     var client: Client { get set }
-    var scopes: Scope { get set }
+    var scopes: [Scope] { get set }
 }

@@ -172,14 +172,44 @@ public struct AuthorizationCodeModelMacro: MemberMacro {
             """,
         ]
     }
-    
-    
 }
+
+public struct AuthorizationCodeScopeModelMacro: MemberMacro {
+    public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingMembersOf declaration: some SwiftSyntax.DeclGroupSyntax, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
+        return [
+            """
+            @ID(key: .id)
+            public var id: UUID?
+            """,
+            """
+            @Parent(key: "authorization_code_id")
+            public var authorizationCode: AuthorizationCode
+            """,
+            """
+            @Parent(key: "scope_id")
+            public var scope: Scopes
+            """,
+            """
+            public init(authorizationCodeID: AuthorizationCode.IDValue, scopeID: Scopes.IDValue) {
+                self.$authorizationCode.id = authorizationCodeID
+                self.$scope.id = scopeID
+            }
+            """,
+            """
+            public init() {
+                    
+            }
+            """,
+        ]
+    }
+}
+
 @main
 struct VaporOAuthMacroPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         AccessTokenModelMacro.self,
         AccesstokenScopeModelMacro.self,
         AuthorizationCodeModelMacro.self,
+        AuthorizationCodeScopeModelMacro.self,
     ]
 }

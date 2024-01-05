@@ -17,6 +17,8 @@ let package = Package(
         // 🍃 An expressive, performant, and extensible templating language built for Swift.
         .package(url: "https://github.com/vapor/leaf.git", from: "4.2.4"),
         .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.2"),
+        
+        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
     ],
     targets: [
         .macro(
@@ -48,5 +50,15 @@ let package = Package(
             .product(name: "FluentMySQLDriver", package: "fluent-mysql-driver"),
             .product(name: "Leaf", package: "leaf"),
         ]),
+        .testTarget(name: "VaporOAuthMacrosTests", dependencies: [
+            "VaporOAuthMacros",
+            .product(name: "XCTVapor", package: "vapor"),
+            .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
+            // Workaround for https://github.com/apple/swift-package-manager/issues/6940
+            .product(name: "Vapor", package: "vapor"),
+            .product(name: "Fluent", package: "Fluent"),
+            .product(name: "FluentMySQLDriver", package: "fluent-mysql-driver"),
+            .product(name: "Leaf", package: "leaf"),
+        ])
     ]
 )

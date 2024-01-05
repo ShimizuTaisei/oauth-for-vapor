@@ -1,9 +1,9 @@
 //
 //  VaporOAuthMacros.swift
 //
-//  
+//
 //  Created by Shimizu Taisei on 2024/01/04.
-//  
+//
 
 
 import SwiftCompilerPlugin
@@ -19,16 +19,16 @@ public struct AccessTokenModelMacro: MemberMacro {
                 public var id: UUID?
             """,
             """
-                @Field(key: "created")
+                @Timestamp(key: "created", on: .create, format: .iso8601)
                 public var created: Date?
             """,
             """
-                @Field(key: "modified")
+                @Timestamp(key: "modified", on: .update, format: .iso8601)
                 public var modified: Date?
             """,
             """
-                @Field(key: "expired")
-                public var expired: Date?
+            @Timestamp(key: "expired", on: .delete, format: .iso8601)
+            public var expired: Date?
             """,
             """
                 @Field(key: "revoked")
@@ -39,12 +39,25 @@ public struct AccessTokenModelMacro: MemberMacro {
                 public var accessToken: String
             """,
             """
+                @Parent(key: "user_id")
+                public var user: User
+            """,
+            """
                 @Parent(key: "client_id")
                 public var client: Clients
             """,
             """
-                @Parent(key: "scopes")
-                public var scopes: Scopes
+                @Siblings(through: AccessTokenScope.self, from: \\.$accessToken, to: \\.$scope)
+                public var scopes: [Scopes]
+            """,
+            """
+                public init(expired: Date, accessToken: String, userID: User.IDValue, clientID: Clients.IDValue) {
+                    self.expired = expired
+                    self.isRevoked = false
+                    self.accessToken = accessToken
+                    self.$user.id = userID
+                    self.$client.id = clientID
+                }
             """,
             """
                 public init() {

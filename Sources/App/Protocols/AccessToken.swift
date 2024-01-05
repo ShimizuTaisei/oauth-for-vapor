@@ -11,6 +11,7 @@ import Fluent
 
 public protocol AccessToken: Model {
     associatedtype User
+    associatedtype AccessTokenScope
     
     var created: Date? { get set }
     var modified: Date? { get set }

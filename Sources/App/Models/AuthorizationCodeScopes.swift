@@ -18,14 +18,14 @@ public final class AuthorizationCodeScopes: AuthorizationCodeScope {
     public var id: UUID?
     
     @Parent(key: "authorization_code_id")
-    public var authorizationCode: AuthorizationCodes
+    public var authorizationCode: AuthorizationCode
     
     @Parent(key: "scope_id")
     public var scope: Scopes
     
-    public init(authorizationCode: AuthorizationCodes, scope: Scopes) {
-        self.authorizationCode = authorizationCode
-        self.scope = scope
+    public init(authorizationCodeID: AuthorizationCode.IDValue, scopeID: Scopes.IDValue) {
+        self.$authorizationCode.id = authorizationCodeID
+        self.$scope.id = scopeID
     }
     
     public init() {

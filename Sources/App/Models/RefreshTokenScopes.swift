@@ -19,14 +19,14 @@ public final class RefreshTokenScopes: RefreshTokenScope {
     public var id: UUID?
     
     @Parent(key: "refresh_token_id")
-    public var refreshToken: RefreshTokens
+    public var refreshToken: RefreshToken
     
     @Parent(key: "refresh_token_id")
     public var scope: Scopes
     
-    public init(refreshToken: RefreshTokens, scope: Scopes) {
-        self.refreshToken = refreshToken
-        self.scope = scope
+    public init(refreshTokenID: RefreshToken.IDValue, scopeID: Scopes.IDValue) {
+        self.$refreshToken.id = refreshTokenID
+        self.$scope.id = scopeID
     }
     
     public init() {

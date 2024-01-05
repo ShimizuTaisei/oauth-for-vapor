@@ -35,10 +35,10 @@ public final class RefreshTokens: RefreshToken {
     public var refreshToken: String
     
     @Parent(key: "access_token")
-    public var accessToken: AccessTokens
+    public var accessToken: AccessToken
     
     @Parent(key: "user_id")
-    public var user: UserTeachers
+    public var user: User
     
     @Parent(key: "client_id")
     public var client: Clients
@@ -46,13 +46,13 @@ public final class RefreshTokens: RefreshToken {
     @Siblings(through: RefreshTokenScopes.self, from: \.$refreshToken, to: \.$scope)
     public var scopes: [Scopes]
     
-    public init(expired: Date, refreshToken: String, accessToken: AccessTokens, user: UserTeachers, client: Clients) {
+    public init(expired: Date, refreshToken: String, accessToken: AccessToken.IDValue, userID: User.IDValue, clientID: Clients.IDValue) {
         self.expired = expired
         self.isRevoked = false
         self.refreshToken = refreshToken
-        self.accessToken = accessToken
-        self.user = user
-        self.client = client
+        self.$accessToken.id = accessToken
+        self.$user.id = userID
+        self.$client.id = clientID
     }
     
     public init() {

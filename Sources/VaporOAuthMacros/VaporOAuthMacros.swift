@@ -14,8 +14,6 @@ import SwiftSyntaxMacros
 public struct AccessTokenModelMacro: MemberMacro {
     public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingMembersOf declaration: some SwiftSyntax.DeclGroupSyntax, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
         return [
-            "public typealias Client = Clients",
-            "public typealias Scope = Scopes",
             """
                 @ID(key: .id)
                 public var id: UUID?

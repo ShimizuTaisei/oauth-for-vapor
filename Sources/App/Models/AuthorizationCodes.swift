@@ -41,30 +41,29 @@ public final class AuthorizationCodes: AuthorizationCode {
     @Field(key: "redirect_uri")
     public var redirectURI: String
     
-    @Field(key: "client_id")
+    @Parent(key: "client_id")
     public var client: Clients
     
     @Parent(key: "user_id")
-    public var user: UserTeachers
+    public var user: User
     
     @OptionalParent(key: "access_token_id")
-    public var accessToken: AccessTokens?
+    public var accessToken: AccessToken?
     
     @OptionalParent(key: "refresh_token_id")
-    public var refreshToken: RefreshTokens?
+    public var refreshToken: RefreshToken?
     
     @Siblings(through: AuthorizationCodeScopes.self, from: \.$authorizationCode, to: \.$scope)
     public var scopes: [Scopes]
     
-    public init(expired: Date? = nil, code: String, redirectURI: String, client: Clients, user: UserTeachers,  scopes: [Scopes]) {
+    public init(expired: Date, code: String, redirectURI: String, clientID: Clients.IDValue, userID: User.IDValue) {
         self.expired = expired
         self.isRevoked = false
         self.isUsed = false
         self.code = code
         self.redirectURI = redirectURI
-        self.client = client
-        self.user = user
-        self.scopes = scopes
+        self.$client.id = clientID
+        self.$user.id = userID
     }
     
     public init() {

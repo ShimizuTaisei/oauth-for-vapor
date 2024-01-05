@@ -18,14 +18,14 @@ public final class AccessTokenScopes: AccessTokenScope {
     public var id: UUID?
     
     @Parent(key: "access_token_id")
-    public var accessToken: AccessTokens
+    public var accessToken: AccessToken
     
     @Parent(key: "scope_id")
     public var scope: Scopes
     
-    public init(accessToken: AccessTokens, scope: Scopes) {
-        self.accessToken = accessToken
-        self.scope = scope
+    public init(accessTokenID: AccessToken.IDValue, scopeID: Scopes.IDValue) {
+        self.$accessToken.id = accessTokenID
+        self.$scope.id = scopeID
     }
     
     public init() {

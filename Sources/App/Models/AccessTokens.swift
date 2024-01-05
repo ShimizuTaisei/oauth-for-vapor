@@ -14,8 +14,6 @@ import VaporOAuthMacros
 public macro AccessTokenModel() = #externalMacro(module: "VaporOAuthMacros", type: "AccessTokenModelMacro")
 
 public final class AccessTokens: AccessToken {
-    public typealias Client = Clients
-    
     public static var schema: String = "oauth_access_tokens"
     public typealias User = UserTeachers
     
@@ -38,7 +36,7 @@ public final class AccessTokens: AccessToken {
     public var accessToken: String
     
     @Parent(key: "user_id")
-    public var user: UserTeachers
+    public var user: User
     
     @Parent(key: "client_id")
     public var client: Clients
@@ -46,7 +44,7 @@ public final class AccessTokens: AccessToken {
     @Siblings(through: AccessTokenScopes.self, from: \.$accessToken, to: \.$scope)
     public var scopes: [Scopes]
     
-    public init(expired: Date, accessToken: String, userID: UserTeachers.IDValue, clientID: Clients.IDValue) {
+    public init(expired: Date, accessToken: String, userID: User.IDValue, clientID: Clients.IDValue) {
         self.expired = expired
         self.isRevoked = false
         self.accessToken = accessToken

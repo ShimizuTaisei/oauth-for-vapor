@@ -31,7 +31,7 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
             ]),
         .executableTarget(
-            name: "App",
+            name: "VaporOAuth",
             dependencies: [
                 "VaporOAuthMacros",
                 .product(name: "Fluent", package: "fluent"),
@@ -41,7 +41,7 @@ let package = Package(
             ]
         ),
         .testTarget(name: "AppTests", dependencies: [
-            .target(name: "App"),
+            .target(name: "VaporOAuth"),
             .product(name: "XCTVapor", package: "vapor"),
 
             // Workaround for https://github.com/apple/swift-package-manager/issues/6940

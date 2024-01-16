@@ -10,7 +10,7 @@ import Foundation
 import Vapor
 import Fluent
 
-public final class Scopes: Scope {
+public final class Scopes: Scope, Content {
     public static var schema: String = "oauth_scopes"
     
     @ID(key: .id)
@@ -36,5 +36,16 @@ public final class Scopes: Scope {
     
     public init() {
         
+    }
+}
+
+extension Scopes {
+    struct Create: Content, Validatable {
+        var name: String
+        var explanation: String?
+        
+        static func validations(_ validations: inout Validations) {
+            validations.add("name", as: String.self, is: !.empty)
+        }
     }
 }

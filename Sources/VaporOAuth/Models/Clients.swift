@@ -50,5 +50,17 @@ public final class Clients: Client {
         self.grantTypes = grantTypes
         self.isConfidentialClient = isConfidentialClient
     }
+}
 
+extension Clients {
+    struct Create: Content, Validatable {
+        var name: String
+        var redirectUri: [String]
+        var grantTypes: [String]
+        var isConfidentialClient: Bool
+        
+        static func validations(_ validations: inout Validations) {
+            validations.add("name", as: String.self, is: !.empty)
+        }
+    }
 }

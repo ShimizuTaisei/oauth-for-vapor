@@ -1,0 +1,46 @@
+//
+//  CreateOAuthAccessTokens.swift
+//
+//  
+//  Created by Shimizu Taisei on 2023/12/27.
+//  
+
+
+import Foundation
+import Vapor
+import Fluent
+
+struct CreateOAuthAccessTokens: AsyncMigration {
+    var name: String
+    var userTableName: String
+    var userTableIdFiled: FieldKey
+    
+    /// The initializer.
+    /// - Parameters:
+    ///   - schema: The name of table to create.
+    ///   - userTableName: The name of user table which is related to access-token.
+    ///   - userTableIdFiled: The name of filed which contain user id.
+    init(_ schema: String = "oauth_access_tokens", userTableName: String, userTableIdFiled: FieldKey) {
+        self.name = schema
+        self.userTableName = userTableName
+        self.userTableIdFiled = userTableIdFiled
+    }
+    
+    func prepare(on database: Database) async throws {
+        try await database.schema(self.name)
+            .id()
+            .field("created", .string)
+            .field("modified", .string)
+            .field("expired", .string)
+            .field("revoked", .bool)
+            .field("access_token", .string, .required)
+            .field("user_id", .uuid, .required, .references(userTableName, userTableIdFiled))
+            .field("client_id", .uuid, .required, .references("oauth_clients", "id"))
+            .unique(on: "access_token")
+            .create()
+    }
+    
+    func revert(on database: Database) async throws {
+        try await database.schema(self.name).delete()
+    }
+}

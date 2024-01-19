@@ -20,6 +20,6 @@ public protocol RefreshToken: Model {
     var refreshToken: String { get set }
     var accessToken: AccessToken { get set }
     var user: User { get set }
-    var client: Clients { get set }
-    var scopes: [Scopes] { get set }
+    var client: OAuthClients { get set }
+    var scopes: [OAuthScopes] { get set }
 }

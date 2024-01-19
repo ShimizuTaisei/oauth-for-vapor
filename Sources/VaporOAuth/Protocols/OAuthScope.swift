@@ -9,7 +9,7 @@
 import Foundation
 import Fluent
 
-public protocol Scope: Model {
+public protocol OAuthScope: Model {
     var created: Date? { get set }
     var modified: Date? { get set }
     var name: String { get set }

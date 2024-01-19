@@ -13,5 +13,5 @@ public protocol RefreshTokenScope: Model {
     associatedtype RefreshToken
     
     var refreshToken: RefreshToken { get set }
-    var scope: Scopes { get set }
+    var scope: OAuthScopes { get set }
 }

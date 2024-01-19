@@ -19,6 +19,6 @@ public protocol AccessToken: Model {
     var isRevoked: Bool { get set }
     var accessToken: String { get set }
     var user: User { get set }
-    var client: Clients { get set }
-    var scopes: [Scopes] { get set }
+    var client: OAuthClients { get set }
+    var scopes: [OAuthScopes] { get set }
 }

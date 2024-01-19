@@ -23,10 +23,10 @@ struct OAuthScopesController: RouteCollection {
         return try await req.view.render(registerFormName)
     }
     
-    func postRegisterForm(req: Request) async throws -> Scopes {
-        try Scopes.Create.validate(content: req)
-        let create = try req.content.decode(Scopes.Create.self)
-        let scope = Scopes(name: create.name, explanation: create.explanation)
+    func postRegisterForm(req: Request) async throws -> OAuthScopes {
+        try OAuthScopes.Create.validate(content: req)
+        let create = try req.content.decode(OAuthScopes.Create.self)
+        let scope = OAuthScopes(name: create.name, explanation: create.explanation)
         try await scope.save(on: req.db)
         return scope
     }

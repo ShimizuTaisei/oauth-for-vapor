@@ -13,5 +13,5 @@ public protocol AuthorizationCodeScope: Model {
     associatedtype AuthorizationCode
     
     var authorizationCode: AuthorizationCode { get set }
-    var scope: Scopes { get set }
+    var scope: OAuthScopes { get set }
 }

@@ -13,5 +13,5 @@ public protocol AccessTokenScope: Model {
     associatedtype AccessToken
     
     var accessToken: AccessToken { get set }
-    var scope: Scopes { get set }
+    var scope: OAuthScopes { get set }
 }

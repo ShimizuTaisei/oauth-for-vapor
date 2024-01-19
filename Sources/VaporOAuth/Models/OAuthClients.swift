@@ -10,7 +10,7 @@ import Foundation
 import Vapor
 import Fluent
 
-public final class Clients: Client {
+public final class OAuthClients: OAuthClient {
     public static var schema: String = "oauth_clients"
     
     @ID(key: .id)
@@ -52,7 +52,7 @@ public final class Clients: Client {
     }
 }
 
-extension Clients {
+extension OAuthClients {
     struct Create: Content, Validatable {
         var name: String
         var redirectUri: [String]

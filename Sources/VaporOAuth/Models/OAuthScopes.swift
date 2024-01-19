@@ -10,7 +10,7 @@ import Foundation
 import Vapor
 import Fluent
 
-public final class Scopes: Scope, Content {
+public final class OAuthScopes: OAuthScope, Content {
     public static var schema: String = "oauth_scopes"
     
     @ID(key: .id)
@@ -39,7 +39,7 @@ public final class Scopes: Scope, Content {
     }
 }
 
-extension Scopes {
+extension OAuthScopes {
     struct Create: Content, Validatable {
         var name: String
         var explanation: String?

@@ -9,7 +9,7 @@
 import Foundation
 import Fluent
 
-public protocol Client: Model {
+public protocol OAuthClient: Model {
     var created: Date? { get set }
     var modified: Date? { get set }
     var name: String { get set }

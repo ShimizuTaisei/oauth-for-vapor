@@ -30,4 +30,5 @@ public protocol AuthorizationCode: Model {
     func setScopes(_ scopes: [OAuthScopes], on database: Database) async throws
     static func queryByAuthCode(on database: Database, code: String) async throws -> Self?
     func loadTokens(on database: Database) async throws
+    func setTokens(accessTokenID: UUID, refreshTokenID: UUID)
 }

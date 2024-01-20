@@ -9,7 +9,7 @@
 import Foundation
 import Fluent
 
-public protocol RefreshToken: Model {
+public protocol RefreshToken: Model where IDValue == UUID {
     associatedtype User: Model
     associatedtype AccessTokenType: AccessToken
     
@@ -24,4 +24,5 @@ public protocol RefreshToken: Model {
     var scopes: [OAuthScopes] { get set }
     
     init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID)
+    func setScopes(_ scopes: [OAuthScopes], on database: Database) async throws
 }

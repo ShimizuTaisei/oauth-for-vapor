@@ -10,8 +10,8 @@ import Foundation
 import Fluent
 
 public protocol RefreshTokenScope: Model {
-    associatedtype RefreshToken
+    associatedtype RefreshTokenType
     
-    var refreshToken: RefreshToken { get set }
+    var refreshToken: RefreshTokenType { get set }
     var scope: OAuthScopes { get set }
 }

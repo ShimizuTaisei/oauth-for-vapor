@@ -10,8 +10,8 @@ import Foundation
 import Fluent
 
 public protocol AuthorizationCodeScope: Model {
-    associatedtype AuthorizationCode
+    associatedtype AuthorizationCodeType
     
-    var authorizationCode: AuthorizationCode { get set }
+    var authorizationCode: AuthorizationCodeType { get set }
     var scope: OAuthScopes { get set }
 }

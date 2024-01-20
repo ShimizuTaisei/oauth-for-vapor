@@ -9,9 +9,9 @@
 import Foundation
 import Fluent
 
-public protocol AccessToken: Model {
-    associatedtype User
-    associatedtype AccessTokenScope
+public protocol AccessToken: Model where IDValue == UUID {
+    associatedtype User: Model
+    associatedtype AccessTokenScopeType
     
     var created: Date? { get set }
     var modified: Date? { get set }
@@ -21,4 +21,6 @@ public protocol AccessToken: Model {
     var user: User { get set }
     var client: OAuthClients { get set }
     var scopes: [OAuthScopes] { get set }
+    
+    init(expired: Date, accessToken: String, userID: User.IDValue, clientID: UUID)
 }

@@ -47,7 +47,7 @@ public struct AccessTokenModelMacro: MemberMacro {
             public var client: OAuthClients
             """,
             """
-            @Siblings(through: AccessTokenScope.self, from: \\.$accessToken, to: \\.$scope)
+            @Siblings(through: AccessTokenScopeType.self, from: \\.$accessToken, to: \\.$scope)
             public var scopes: [OAuthScopes]
             """,
             """
@@ -78,14 +78,14 @@ public struct AccesstokenScopeModelMacro: MemberMacro {
             """,
             """
             @Parent(key: "access_token_id")
-            public var accessToken: AccessToken
+            public var accessToken: AccessTokenType
             """,
             """
             @Parent(key: "scope_id")
             public var scope: OAuthScopes
             """,
             """
-            public init(accessTokenID: AccessToken.IDValue, scopeID: OAuthScopes.IDValue) {
+            public init(accessTokenID: AccessTokenType.IDValue, scopeID: OAuthScopes.IDValue) {
                 self.$accessToken.id = accessTokenID
                 self.$scope.id = scopeID
             }
@@ -101,6 +101,11 @@ public struct AccesstokenScopeModelMacro: MemberMacro {
 
 public struct AuthorizationCodeModelMacro: MemberMacro {
     public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingMembersOf declaration: some SwiftSyntax.DeclGroupSyntax, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
+        guard let decl = declaration.as(ClassDeclSyntax.self) else {
+            return []
+        }
+        let name = decl.name.text
+        
         return [
             """
             @ID(key: .id)
@@ -144,11 +149,11 @@ public struct AuthorizationCodeModelMacro: MemberMacro {
             """,
             """
             @OptionalParent(key: "access_token_id")
-            public var accessToken: AccessToken?
+            public var accessToken: AccessTokenType?
             """,
             """
             @OptionalParent(key: "refresh_token_id")
-            public var refreshToken: RefreshToken?
+            public var refreshToken: RefreshTokenType?
             """,
             """
             @Siblings(through: AuthorizationCodeScopes.self, from: \\.$authorizationCode, to: \\.$scope)
@@ -174,7 +179,19 @@ public struct AuthorizationCodeModelMacro: MemberMacro {
             public func setScopes(_ scopes: [OAuthScopes], on database: Database) async throws {
                 try await self.$scopes.attach(scopes, on: database)
             }
+            """,
             """
+            public static func queryByAuthCode(on database: Database, code: String) async throws -> \(raw: name)? {
+                let authCode = try await \(raw: name).query(on: database).filter(\\.$code == code).with(\\.$user).with(\\.$scopes).first()
+                return authCode
+            }
+            """,
+            """
+            public func loadTokens(on database: Database) async throws {
+                try await self.$accessToken.load(on: database)
+                try await self.$refreshToken.load(on: database)
+            }
+            """,
         ]
     }
 }
@@ -188,14 +205,14 @@ public struct AuthorizationCodeScopeModelMacro: MemberMacro {
             """,
             """
             @Parent(key: "authorization_code_id")
-            public var authorizationCode: AuthorizationCode
+            public var authorizationCode: AuthorizationCodeType
             """,
             """
             @Parent(key: "scope_id")
             public var scope: OAuthScopes
             """,
             """
-            public init(authorizationCodeID: AuthorizationCode.IDValue, scopeID: OAuthScopes.IDValue) {
+            public init(authorizationCodeID: AuthorizationCodeType.IDValue, scopeID: OAuthScopes.IDValue) {
                 self.$authorizationCode.id = authorizationCodeID
                 self.$scope.id = scopeID
             }
@@ -238,7 +255,7 @@ public struct RefreshTokenModelMacro: MemberMacro {
             """,
             """
             @Parent(key: "access_token")
-            public var accessToken: AccessToken
+            public var accessToken: AccessTokenType
             """,
             """
             @Parent(key: "user_id")
@@ -253,11 +270,11 @@ public struct RefreshTokenModelMacro: MemberMacro {
             public var scopes: [OAuthScopes]
             """,
             """
-            public init(expired: Date, refreshToken: String, accessToken: AccessToken.IDValue, userID: User.IDValue, clientID: OAuthClients.IDValue) {
+            public init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID) {
                 self.expired = expired
                 self.isRevoked = false
                 self.refreshToken = refreshToken
-                self.$accessToken.id = accessToken
+                self.$accessToken.id = accessTokenID
                 self.$user.id = userID
                 self.$client.id = clientID
             }
@@ -280,14 +297,14 @@ public struct RefreshTokenScopeModelMacro: MemberMacro {
             """,
             """
             @Parent(key: "refresh_token_id")
-            public var refreshToken: RefreshToken
+            public var refreshToken: RefreshTokenType
             """,
             """
             @Parent(key: "refresh_token_id")
             public var scope: OAuthScopes
             """,
             """
-            public init(refreshTokenID: RefreshToken.IDValue, scopeID: OAuthScopes.IDValue) {
+            public init(refreshTokenID: RefreshTokenType.IDValue, scopeID: OAuthScopes.IDValue) {
                 self.$refreshToken.id = refreshTokenID
                 self.$scope.id = scopeID
             }

@@ -10,16 +10,18 @@ import Foundation
 import Fluent
 
 public protocol RefreshToken: Model {
-    associatedtype User
-    associatedtype AccessToken
+    associatedtype User: Model
+    associatedtype AccessTokenType: AccessToken
     
     var created: Date? { get set }
     var modified: Date? { get set }
     var expired: Date? { get set }
     var isRevoked: Bool { get set }
     var refreshToken: String { get set }
-    var accessToken: AccessToken { get set }
+    var accessToken: AccessTokenType { get set }
     var user: User { get set }
     var client: OAuthClients { get set }
     var scopes: [OAuthScopes] { get set }
+    
+    init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID)
 }

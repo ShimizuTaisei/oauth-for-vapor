@@ -10,7 +10,7 @@ import Foundation
 import Fluent
 import Vapor
 
-public class Users: Model {
+public final class UserTeachers: Model {
     public static var schema: String = "users"
     
     @ID(key: .id)
@@ -38,7 +38,13 @@ public class Users: Model {
     }
 }
 
-public final class UserTeachers: Users, Content {
-    @Field(key: "lname")
-    var lname: String
+
+extension UserTeachers: ModelAuthenticatable {
+    public static let usernameKey = \UserTeachers.$loginID
+    public static let passwordHashKey = \UserTeachers.$password
+    
+    public func verify(password: String) throws -> Bool {
+        let isValid = try Bcrypt.verify(password, created: self.password)
+        return isValid
+    }
 }

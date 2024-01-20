@@ -11,7 +11,7 @@ import Fluent
 
 public protocol AccessToken: Model where IDValue == UUID {
     associatedtype User: Model
-    associatedtype AccessTokenScopeType
+    associatedtype AccessTokenScopeType: AccessTokenScope
     
     var created: Date? { get set }
     var modified: Date? { get set }
@@ -23,4 +23,5 @@ public protocol AccessToken: Model where IDValue == UUID {
     var scopes: [OAuthScopes] { get set }
     
     init(expired: Date, accessToken: String, userID: User.IDValue, clientID: UUID)
+    func setScope(_ scopes: [OAuthScopes], on database: Database) async throws
 }

@@ -66,6 +66,10 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public init() {
 
             }
+        
+            public func setScope(_ scopes: [OAuthScopes], on database: Database) async throws {
+                try await self.$scopes.attach(scopes, on: database)
+            }
         }
         """
         , macros: ["AccessTokenModel": AccessTokenModelMacro.self])
@@ -283,6 +287,10 @@ final class VaporOAuthMacrosTests: XCTestCase {
 
             public init() {
 
+            }
+        
+            public func setScopes(_ scopes: [OAuthScopes], on database: Database) async throws {
+                try await self.$scopes.attach(scopes, on: database)
             }
         }
         """,macros: ["RefreshTokenModel": RefreshTokenModelMacro.self])

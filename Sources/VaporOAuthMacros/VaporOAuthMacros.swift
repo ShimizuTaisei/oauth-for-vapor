@@ -64,6 +64,11 @@ public struct AccessTokenModelMacro: MemberMacro {
 
             }
             """,
+            """
+            public func setScope(_ scopes: [OAuthScopes], on database: Database) async throws {
+                try await self.$scopes.attach(scopes, on: database)
+            }
+            """,
         ]
     }
 }
@@ -283,7 +288,12 @@ public struct RefreshTokenModelMacro: MemberMacro {
             public init() {
                 
             }
+            """,
             """
+            public func setScopes(_ scopes: [OAuthScopes], on database: Database) async throws {
+                try await self.$scopes.attach(scopes, on: database)
+            }
+            """,
         ]
     }
 }

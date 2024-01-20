@@ -18,5 +18,5 @@ public macro RefreshTokenScopeModel() = #externalMacro(module: "VaporOAuthMacros
 public final class RefreshTokenScopes: RefreshTokenScope {
     public static var schema: String = "oauth_refresh_token_scopes"
     
-    public typealias RefreshToken = RefreshTokens
+    public typealias RefreshTokenType = RefreshTokens
 }

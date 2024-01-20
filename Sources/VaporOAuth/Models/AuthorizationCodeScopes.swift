@@ -17,5 +17,5 @@ public macro AuthorizationCodeScopeModel() = #externalMacro(module: "VaporOAuthM
 @AuthorizationCodeScopeModel
 public final class AuthorizationCodeScopes: AuthorizationCodeScope {
     public static var schema: String = "oauth_authorization_code_scopes"
-    public typealias AuthorizationCode = AuthorizationCodes
+    public typealias AuthorizationCodeType = AuthorizationCodes
 }

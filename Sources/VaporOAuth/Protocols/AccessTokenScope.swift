@@ -10,8 +10,8 @@ import Foundation
 import Fluent
 
 public protocol AccessTokenScope: Model {
-    associatedtype AccessToken
+    associatedtype AccessTokenType: AccessToken
     
-    var accessToken: AccessToken { get set }
+    var accessToken: AccessTokenType { get set }
     var scope: OAuthScopes { get set }
 }

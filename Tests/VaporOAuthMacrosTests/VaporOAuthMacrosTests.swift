@@ -19,13 +19,13 @@ final class VaporOAuthMacrosTests: XCTestCase {
         @AccessTokenModel
         public final class AccessTokens: AccessToken {
             public static var schema: String = "oauth_access_tokens"
-            public typealias User = UserTeachers
+            public typealias User = Users
             public typealias AccessTokenScope = AccessTokenScopes
         }
         """, expandedSource: """
         public final class AccessTokens: AccessToken {
             public static var schema: String = "oauth_access_tokens"
-            public typealias User = UserTeachers
+            public typealias User = Users
             public typealias AccessTokenScope = AccessTokenScopes
 
             @ID(key: .id)
@@ -111,7 +111,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
         public final class AuthorizationCodes: AuthorizationCode {
             public static var schema: String = "oauth_authorization_codes"
             
-            public typealias User = UserTeachers
+            public typealias User = Users
             public typealias AccessToken = AccessTokens
             public typealias RefreshToken = RefreshTokens
         }
@@ -119,7 +119,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
         public final class AuthorizationCodes: AuthorizationCode {
             public static var schema: String = "oauth_authorization_codes"
             
-            public typealias User = UserTeachers
+            public typealias User = Users
             public typealias AccessToken = AccessTokens
             public typealias RefreshToken = RefreshTokens
 
@@ -222,14 +222,14 @@ final class VaporOAuthMacrosTests: XCTestCase {
         public final class RefreshTokens: RefreshToken {
             public static var schema: String = "oauth_refresh_tokens"
 
-            public typealias User = UserTeachers
+            public typealias User = Users
             public typealias AccessToken = AccessTokens
         }
         """, expandedSource: """
         public final class RefreshTokens: RefreshToken {
             public static var schema: String = "oauth_refresh_tokens"
 
-            public typealias User = UserTeachers
+            public typealias User = Users
             public typealias AccessToken = AccessTokens
 
             @ID(key: .id)

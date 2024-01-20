@@ -10,7 +10,7 @@ import Foundation
 import Vapor
 import Fluent
 
-public class AuthCodeUtility<AuthCodes: AuthorizationCode> {
+public class AuthCodeUtility {
     /// Validate authorization code request and create response for redirection to login form.
     /// - Parameters:
     ///   - req: Request object from route function.
@@ -51,7 +51,10 @@ public class AuthCodeUtility<AuthCodes: AuthorizationCode> {
         return req.redirect(to: redirectURI, redirectType: .normal)
     }
     
-    public func issueAuthCode(req: Request) async throws -> Response {
+    /// Issue authorization code after login.
+    /// - Parameter req: Request object from route function.
+    /// - Returns: The resonse which redirect user to given redirect-uri.
+    public func issueAuthCode<AuthCodes: AuthorizationCode>(req: Request, type: AuthCodes.Type) async throws -> Response {
         let state = req.session.data["state"]
         
         guard let redirectURI = req.session.data["redirect_uri"] else {
@@ -76,7 +79,7 @@ public class AuthCodeUtility<AuthCodes: AuthorizationCode> {
             return try buildAuthCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidScope, description: "Not found scope")
         }
         
-        let authorizationCode = try generateAuthorizationCode(userID: user.requireID(), clientID: client.requireID(), redirectURI: redirectURI)
+        let authorizationCode: AuthCodes = try generateAuthorizationCode(userID: user.requireID(), clientID: client.requireID(), redirectURI: redirectURI)
         try await authorizationCode.save(on: req.db)
         try await authorizationCode.setScopes(scopes, on: req.db)
         
@@ -107,7 +110,7 @@ public class AuthCodeUtility<AuthCodes: AuthorizationCode> {
         }
     }
     
-    private func generateAuthorizationCode(userID: AuthCodes.User.IDValue, clientID: OAuthClients.IDValue, redirectURI: String) throws -> AuthCodes {
+    private func generateAuthorizationCode<AuthCodes: AuthorizationCode>(userID: AuthCodes.User.IDValue, clientID: OAuthClients.IDValue, redirectURI: String) throws -> AuthCodes {
         let code = [UInt8].random(count: 64).base64.replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
         guard let expiresDate = Calendar.current.date(byAdding: .minute, value: 3, to: Date()) else {
             throw Abort(.internalServerError, reason: "Couldn't get expires date.")
@@ -115,6 +118,8 @@ public class AuthCodeUtility<AuthCodes: AuthorizationCode> {
         let authCodes = AuthCodes(expired: expiresDate, code: code, redirectURI: redirectURI, clientID: clientID, userID: userID)
         return authCodes
     }
+    
+    
 }
 
 struct AuthorizationRequest: Content {

@@ -18,7 +18,7 @@ public macro AuthorizationCodeModel() = #externalMacro(module: "VaporOAuthMacros
 public final class AuthorizationCodes: AuthorizationCode {
     public static var schema: String = "oauth_authorization_codes"
     
-    public typealias User = UserTeachers
+    public typealias User = Users
     public typealias AccessToken = AccessTokens
     public typealias RefreshToken = RefreshTokens
 }

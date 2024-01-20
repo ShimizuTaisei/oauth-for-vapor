@@ -10,7 +10,7 @@ import Foundation
 import Fluent
 
 public protocol AuthorizationCode: Model {
-    associatedtype User
+    associatedtype User: Model, ModelAuthenticatable
     associatedtype AccessToken
     associatedtype RefreshToken
     var created: Date? { get set }
@@ -25,4 +25,7 @@ public protocol AuthorizationCode: Model {
     var accessToken: AccessToken? { get set }
     var refreshToken: RefreshToken? { get set }
     var scopes: [OAuthScopes] { get set }
+    
+    init(expired: Date, code: String, redirectURI: String, clientID: OAuthClients.IDValue, userID: User.IDValue)
+    func setScopes(_ scopes: [OAuthScopes], on database: Database) async throws
 }

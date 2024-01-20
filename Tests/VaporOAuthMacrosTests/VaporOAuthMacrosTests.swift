@@ -50,12 +50,12 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public var user: User
 
             @Parent(key: "client_id")
-            public var client: Clients
+            public var client: OAuthClients
 
             @Siblings(through: AccessTokenScope.self, from: \\.$accessToken, to: \\.$scope)
-            public var scopes: [Scopes]
+            public var scopes: [OAuthScopes]
 
-            public init(expired: Date, accessToken: String, userID: User.IDValue, clientID: Clients.IDValue) {
+            public init(expired: Date, accessToken: String, userID: User.IDValue, clientID: OAuthClients.IDValue) {
                 self.expired = expired
                 self.isRevoked = false
                 self.accessToken = accessToken
@@ -90,9 +90,9 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public var accessToken: AccessToken
 
             @Parent(key: "scope_id")
-            public var scope: Scopes
+            public var scope: OAuthScopes
 
-            public init(accessTokenID: AccessToken.IDValue, scopeID: Scopes.IDValue) {
+            public init(accessTokenID: AccessToken.IDValue, scopeID: OAuthScopes.IDValue) {
                 self.$accessToken.id = accessTokenID
                 self.$scope.id = scopeID
             }
@@ -148,7 +148,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public var redirectURI: String
 
             @Parent(key: "client_id")
-            public var client: Clients
+            public var client: OAuthClients
 
             @Parent(key: "user_id")
             public var user: User
@@ -160,9 +160,9 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public var refreshToken: RefreshToken?
 
             @Siblings(through: AuthorizationCodeScopes.self, from: \\.$authorizationCode, to: \\.$scope)
-            public var scopes: [Scopes]
+            public var scopes: [OAuthScopes]
 
-            public init(expired: Date, code: String, redirectURI: String, clientID: Clients.IDValue, userID: User.IDValue) {
+            public init(expired: Date, code: String, redirectURI: String, clientID: OAuthClients.IDValue, userID: User.IDValue) {
                 self.expired = expired
                 self.isRevoked = false
                 self.isUsed = false
@@ -174,6 +174,10 @@ final class VaporOAuthMacrosTests: XCTestCase {
 
             public init() {
 
+            }
+        
+            public func setScopes(_ scopes: [OAuthScopes], on database: Database) async throws {
+                try await self.$scopes.attach(scopes, on: database)
             }
         }
         """, macros: ["AuthorizationCodeModel": AuthorizationCodeModelMacro.self])
@@ -198,9 +202,9 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public var authorizationCode: AuthorizationCode
 
             @Parent(key: "scope_id")
-            public var scope: Scopes
+            public var scope: OAuthScopes
 
-            public init(authorizationCodeID: AuthorizationCode.IDValue, scopeID: Scopes.IDValue) {
+            public init(authorizationCodeID: AuthorizationCode.IDValue, scopeID: OAuthScopes.IDValue) {
                 self.$authorizationCode.id = authorizationCodeID
                 self.$scope.id = scopeID
             }
@@ -253,12 +257,12 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public var user: User
 
             @Parent(key: "client_id")
-            public var client: Clients
+            public var client: OAuthClients
 
             @Siblings(through: RefreshTokenScopes.self, from: \\.$refreshToken, to: \\.$scope)
-            public var scopes: [Scopes]
+            public var scopes: [OAuthScopes]
 
-            public init(expired: Date, refreshToken: String, accessToken: AccessToken.IDValue, userID: User.IDValue, clientID: Clients.IDValue) {
+            public init(expired: Date, refreshToken: String, accessToken: AccessToken.IDValue, userID: User.IDValue, clientID: OAuthClients.IDValue) {
                 self.expired = expired
                 self.isRevoked = false
                 self.refreshToken = refreshToken
@@ -295,9 +299,9 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public var refreshToken: RefreshToken
 
             @Parent(key: "refresh_token_id")
-            public var scope: Scopes
+            public var scope: OAuthScopes
 
-            public init(refreshTokenID: RefreshToken.IDValue, scopeID: Scopes.IDValue) {
+            public init(refreshTokenID: RefreshToken.IDValue, scopeID: OAuthScopes.IDValue) {
                 self.$refreshToken.id = refreshTokenID
                 self.$scope.id = scopeID
             }

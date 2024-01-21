@@ -299,7 +299,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
             }
         
             public static func queryRefreshToken(_ refreshToken: String, on database: Database) async throws -> RefreshTokens? {
-                let refreshToken = try await RefreshTokens.query(on: database).filter(\\.$refreshToken == refreshToken).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
+                let refreshToken = try await RefreshTokens.query(on: database).filter(\\.$refreshToken == refreshToken).with(\\.$accessToken).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
                 return refreshToken
             }
         }

@@ -1,7 +1,7 @@
 @testable import VaporOAuth
 import XCTVapor
 
-final class AppTests: XCTestCase {
+final class VaporOAuthTests: XCTestCase {
     func testHelloWorld() async throws {
         let app = Application(.testing)
         defer { app.shutdown() }

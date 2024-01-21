@@ -40,7 +40,7 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
             ]
         ),
-        .testTarget(name: "AppTests", dependencies: [
+        .testTarget(name: "VaporOAuthTests", dependencies: [
             .target(name: "VaporOAuth"),
             .product(name: "XCTVapor", package: "vapor"),
 

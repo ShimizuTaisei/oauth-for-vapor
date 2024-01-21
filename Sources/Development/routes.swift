@@ -10,6 +10,7 @@ func routes(_ app: Application) throws {
     app.get("hello") { req async -> String in
         "Hello, world!"
     }
+    try app.register(collection: UsersController())
     
     try app.register(collection: OAuthClientsController())
     try app.register(collection: OAuthScopesController())

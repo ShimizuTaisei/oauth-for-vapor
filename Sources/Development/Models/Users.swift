@@ -10,7 +10,7 @@ import Foundation
 import Fluent
 import Vapor
 
-public final class Users: Model {
+public final class Users: Model, Content {
     public static var schema: String = "users"
     
     @ID(key: .id)
@@ -32,12 +32,25 @@ public final class Users: Model {
         
     }
     
-    public init(loginID: String, password: String) {
+    public init(loginID: String, password: String) throws {
         self.loginID = loginID
-        self.password = password
+        self.password = try Bcrypt.hash(password)
     }
 }
 
+extension Users {
+    struct Create: Content {
+        var loginID: String
+        var password: String
+    }
+}
+
+extension Users.Create: Validatable {
+    static func validations(_ validations: inout Validations) {
+        validations.add("loginID", as: String.self, is: !.empty)
+        validations.add("password", as: String.self, is: !.empty)
+    }
+}
 
 extension Users: ModelAuthenticatable {
     public static let usernameKey = \Users.$loginID
@@ -48,3 +61,6 @@ extension Users: ModelAuthenticatable {
         return isValid
     }
 }
+
+extension Users: ModelCredentialsAuthenticatable {}
+extension Users: ModelSessionAuthenticatable {}

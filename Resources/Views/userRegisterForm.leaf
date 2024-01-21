@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>ユーザ追加</title>
+    </head>
+
+    <body>
+        <form method="POST" action="/users/register/">
+            <label for="loginID">Login ID</label>
+            <input type="text" id="loginID" placeholder="Login ID", name="loginID" autocomplete="username", required1>
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Password" name="password" autocomplete="new-password" required>
+            <input type="submit" value="Add">
+        </form>
+    </body>
+</html>

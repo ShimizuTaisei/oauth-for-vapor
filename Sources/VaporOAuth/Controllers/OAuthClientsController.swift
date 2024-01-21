@@ -10,9 +10,9 @@ import Foundation
 import Vapor
 import Fluent
 
-struct OAuthClientsController: RouteCollection {
+public struct OAuthClientsController: RouteCollection {
     let registerFormName: String = "oauthClientRegisterForm"
-    func boot(routes: RoutesBuilder) throws {
+    public func boot(routes: RoutesBuilder) throws {
         
     }
     

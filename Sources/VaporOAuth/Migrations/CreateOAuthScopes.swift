@@ -10,10 +10,10 @@ import Foundation
 import Vapor
 import Fluent
 
-struct CreateOAuthScopes: AsyncMigration {
-    var name: String { "CreateOAuthScopes" }
+public struct CreateOAuthScopes: AsyncMigration {
+    public var name: String { "CreateOAuthScopes" }
     
-    func prepare(on database: Database) async throws {
+    public func prepare(on database: Database) async throws {
         try await database.schema("oauth_scopes")
             .id()
             .field("created", .string)
@@ -23,7 +23,7 @@ struct CreateOAuthScopes: AsyncMigration {
             .create()
     }
     
-    func revert(on database: Database) async throws {
+    public func revert(on database: Database) async throws {
         try await database.schema("oauth_scopes").delete()
     }
 }

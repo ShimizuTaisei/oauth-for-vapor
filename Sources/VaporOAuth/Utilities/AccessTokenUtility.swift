@@ -156,3 +156,39 @@ public class AccessTokenUtility {
         return Response(status: statusCode, headers: headers, body: .init(data: body))
     }
 }
+
+struct AccessTokenFromAuthorizationCodeRequest: Content {
+    var grant_type: String
+    var code: String
+    var redirect_uri: String
+    var client_id: String
+}
+
+struct AccessTokenFromRefreshTokenRequest: Content {
+    var grant_type: String
+    var refresh_token: String
+    var scope: String?
+}
+
+struct AccessTokenResponse: Content {
+    var access_token: String
+    var token_type: String
+    var expires_in: Int
+    var refresh_token: String?
+    var scope: String?
+}
+
+struct AccessTokenErrorResponse: Content {
+    var error: String
+    var error_description: String?
+    var error_uri: String?
+}
+
+enum AccessTokenError: String {
+    case invalidRequest = "invalid_request"
+    case invalidClient = "invalid_client"
+    case invalidGrant = "invalid_grant"
+    case unauthorizedClient = "unauthorized_client"
+    case unsupportedGrantType = "unsupported_grant_type"
+    case invalidScope = "invalid_scope"
+}

@@ -9,20 +9,20 @@
 import Foundation
 import Fluent
 
-struct CreateOAuthAccessTokenScopes: AsyncMigration {
-    var name: String
+public struct CreateOAuthAccessTokenScopes: AsyncMigration {
+    public var name: String
     var accessTokenTableName: String
     
     /// init
     /// - Parameters:
     ///   - schema: The name of table to create.
     ///   - accessTokenTableName: The name of access-token table which is refered from this table.
-    init(_ schema: String = "oauth_access_token_scopes", accessTokenTableName: String = "oauth_access_tokens") {
+    public init(_ schema: String = "oauth_access_token_scopes", accessTokenTableName: String = "oauth_access_tokens") {
         self.name = schema
         self.accessTokenTableName = accessTokenTableName
     }
     
-    func prepare(on database: Database) async throws {
+    public func prepare(on database: Database) async throws {
         try await database.schema(self.name)
             .id()
             .field("access_token_id", .uuid, .required, .references(self.accessTokenTableName, "id", onDelete: .cascade))
@@ -31,7 +31,7 @@ struct CreateOAuthAccessTokenScopes: AsyncMigration {
             .create()
     }
     
-    func revert(on database: Database) async throws {
+    public func revert(on database: Database) async throws {
         try await database.schema(self.name).delete()
     }
 }

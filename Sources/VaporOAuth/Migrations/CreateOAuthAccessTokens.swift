@@ -10,8 +10,8 @@ import Foundation
 import Vapor
 import Fluent
 
-struct CreateOAuthAccessTokens: AsyncMigration {
-    var name: String
+public struct CreateOAuthAccessTokens: AsyncMigration {
+    public var name: String
     var userTableName: String
     var userTableIdFiled: FieldKey
     
@@ -20,13 +20,13 @@ struct CreateOAuthAccessTokens: AsyncMigration {
     ///   - schema: The name of table to create.
     ///   - userTableName: The name of user table which is related to access-token.
     ///   - userTableIdFiled: The name of filed which contain user id.
-    init(_ schema: String = "oauth_access_tokens", userTableName: String, userTableIdFiled: FieldKey) {
+    public init(_ schema: String = "oauth_access_tokens", userTableName: String, userTableIdFiled: FieldKey) {
         self.name = schema
         self.userTableName = userTableName
         self.userTableIdFiled = userTableIdFiled
     }
     
-    func prepare(on database: Database) async throws {
+    public func prepare(on database: Database) async throws {
         try await database.schema(self.name)
             .id()
             .field("created", .string)
@@ -40,7 +40,7 @@ struct CreateOAuthAccessTokens: AsyncMigration {
             .create()
     }
     
-    func revert(on database: Database) async throws {
+    public func revert(on database: Database) async throws {
         try await database.schema(self.name).delete()
     }
 }

@@ -52,7 +52,7 @@ public class AccessTokenUtility {
             return try accessTokenError(req: req, statusCode: .unauthorized, error: .invalidClient, description: "Invalid client_id")
         }
         
-        guard let uri = client.redirectURIs.first(where: { $0 == requestParams.redirect_uri }) else {
+        guard let _ = client.redirectURIs.first(where: { $0 == requestParams.redirect_uri }) else {
             return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidGrant, description: "Invalid redirect_uri.")
         }
         
@@ -87,7 +87,7 @@ public class AccessTokenUtility {
         let jsonEncoder = JSONEncoder()
         jsonEncoder.outputFormatting = .prettyPrinted
         
-        let (response, newAccessToken, newRefreshToken): (AccessTokenResponse, AccessTokens, RefreshTokens) = try await buildAccessTokens(req: req, userID: refreshToken.user.requireID() as! AccessTokens.User.IDValue, clientID: refreshToken.client.requireID(), scopes: refreshToken.scopes)
+        let (response, _, _): (AccessTokenResponse, AccessTokens, RefreshTokens) = try await buildAccessTokens(req: req, userID: refreshToken.user.requireID() as! AccessTokens.User.IDValue, clientID: refreshToken.client.requireID(), scopes: refreshToken.scopes)
         
         // Revoke previous access token.
         let oldAccessToken = refreshToken.accessToken

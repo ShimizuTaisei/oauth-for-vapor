@@ -5,7 +5,10 @@ import CompilerPluginSupport
 let package = Package(
     name: "VaporOAuth",
     platforms: [
-       .macOS(.v13)
+        .macOS(.v13)
+    ], 
+    products: [
+        .library(name: "VaporOAuth", targets: ["VaporOAuth"])
     ],
     dependencies: [
         // 💧 A server-side Swift web framework.

@@ -12,11 +12,17 @@ import Fluent
 
 public struct OAuthScopesController: RouteCollection {
     let registerFormName: String = "oauthScopeRegisterForm"
+    public init() {}
+    
     public func boot(routes: RoutesBuilder) throws {
         let oauthScopes = routes.grouped("oauth", "scopes")
-        
+        oauthScopes.get(use: getLists(req:))
         oauthScopes.get("new", use: getRegisterForm(req:))
         oauthScopes.post("new", use: postRegisterForm(req:))
+    }
+    
+    func getLists(req: Request) async throws -> [OAuthScopes] {
+        return try await OAuthScopes.query(on: req.db).all()
     }
     
     func getRegisterForm(req: Request) async throws -> View {

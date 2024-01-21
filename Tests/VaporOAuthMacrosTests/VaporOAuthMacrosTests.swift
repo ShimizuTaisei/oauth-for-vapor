@@ -193,6 +193,11 @@ final class VaporOAuthMacrosTests: XCTestCase {
                 try await self.$accessToken.load(on: database)
                 try await self.$refreshToken.load(on: database)
             }
+        
+            public func setTokens(accessTokenID: UUID, refreshTokenID: UUID) {
+                self.$accessToken.id = accessTokenID
+                self.$refreshToken.id = refreshTokenID
+            }
         }
         """, macros: ["AuthorizationCodeModel": AuthorizationCodeModelMacro.self])
     }
@@ -291,6 +296,11 @@ final class VaporOAuthMacrosTests: XCTestCase {
         
             public func setScopes(_ scopes: [OAuthScopes], on database: Database) async throws {
                 try await self.$scopes.attach(scopes, on: database)
+            }
+        
+            public static func queryRefreshToken(_ refreshToken: String, on database: Database) async throws -> RefreshTokens? {
+                let refreshToken = try await RefreshTokens.query(on: database).filter(\\.$refreshToken == refreshToken).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
+                return refreshToken
             }
         }
         """,macros: ["RefreshTokenModel": RefreshTokenModelMacro.self])

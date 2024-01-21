@@ -21,9 +21,4 @@ public final class AuthorizationCodes: AuthorizationCode {
     public typealias User = Users
     public typealias AccessTokenType = AccessTokens
     public typealias RefreshTokenType = RefreshTokens
-    
-    public func setTokens(accessTokenID: UUID, refreshTokenID: UUID) {
-        self.$accessToken.id = accessTokenID
-        self.$refreshToken.id = refreshTokenID
-    }
 }

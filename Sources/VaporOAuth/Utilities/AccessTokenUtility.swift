@@ -13,7 +13,7 @@ import Fluent
 public class AccessTokenUtility {
     public func accessTokenFromAuthCode
     <AuthCodes: AuthorizationCode, AccessTokens: AccessToken, RefreshTokens: RefreshToken>
-    (req: Request, authCode: AuthCodes.Type, accessToken: AccessTokens.Type, refreshToken: RefreshTokens.Type) async throws -> Response {
+    (req: Request, authCode: AuthCodes.Type, accessToken a: AccessTokens.Type, refreshToken r: RefreshTokens.Type) async throws -> Response {
         let requestParams = try req.content.decode(AccessTokenFromAuthorizationCodeRequest.self)
         guard let authCode = try await AuthCodes.queryByAuthCode(on: req.db, code: requestParams.code) else {
             return try accessTokenError(req: req, statusCode: .unauthorized, error: .invalidGrant, description: "Missing or invalid code.")
@@ -66,6 +66,39 @@ public class AccessTokenUtility {
         let (response, accessToken, refreshToken): (AccessTokenResponse, AccessTokens, RefreshTokens) = try await buildAccessTokens(req: req, userID: authCode.user.requireID() as! AccessTokens.User.IDValue, clientID: client.requireID(), scopes: authCode.scopes)
         try authCode.setTokens(accessTokenID: accessToken.requireID(), refreshTokenID: refreshToken.requireID())
         try await authCode.save(on: req.db)
+        
+        let headers = HTTPHeaders([("Content-Type", "application/json; charset=utf-8")])
+        let body = try jsonEncoder.encode(response)
+        return Response(status: .ok, headers: headers, body: .init(data: body))
+    }
+    
+    public func accessTokenFromRefreshToken<AccessTokens: AccessToken, RefreshTokens: RefreshToken>(req: Request, accessToken a: AccessTokens.Type, refreshToken r: RefreshTokens.Type) async throws -> Response {
+        let requestParams = try req.content.decode(AccessTokenFromRefreshTokenRequest.self)
+        guard let refreshToken = try await RefreshTokens.queryRefreshToken(requestParams.refresh_token, on: req.db) else {
+            return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidRequest, description: "Invalid refresh_token")
+        }
+        if refreshToken.isRevoked {
+            return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidRequest, description: "refresh_token is revoked.")
+        }
+        if Date() >= refreshToken.expired ?? Date() {
+            return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidRequest, description: "refresh_token is already expired.")
+        }
+        
+        let jsonEncoder = JSONEncoder()
+        jsonEncoder.outputFormatting = .prettyPrinted
+        
+        let (response, newAccessToken, newRefreshToken): (AccessTokenResponse, AccessTokens, RefreshTokens) = try await buildAccessTokens(req: req, userID: refreshToken.user.requireID() as! AccessTokens.User.IDValue, clientID: refreshToken.client.requireID(), scopes: refreshToken.scopes)
+        
+        // Revoke previous access token.
+        let oldAccessToken = refreshToken.accessToken
+        oldAccessToken.isRevoked = true
+        oldAccessToken.expired = Date()
+        try await oldAccessToken.save(on: req.db)
+        
+        // Revoke previous refresh token.
+        refreshToken.isRevoked = true
+        refreshToken.expired = Date()
+        try await refreshToken.save(on: req.db)
         
         let headers = HTTPHeaders([("Content-Type", "application/json; charset=utf-8")])
         let body = try jsonEncoder.encode(response)

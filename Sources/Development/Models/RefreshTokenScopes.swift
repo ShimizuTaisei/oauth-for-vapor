@@ -2,17 +2,13 @@
 //  RefreshTokenScopes.swift
 //
 //  
-//  Created by Shimizu Taisei on 2024/01/04.
+//  Created by Shimizu Taisei on 2024/01/21.
 //  
 
 
 import Foundation
-import Vapor
 import Fluent
-import VaporOAuthMacros
-
-@attached(member, names: arbitrary)
-public macro RefreshTokenScopeModel() = #externalMacro(module: "VaporOAuthMacros", type: "RefreshTokenScopeModelMacro")
+import VaporOAuth
 
 @RefreshTokenScopeModel
 public final class RefreshTokenScopes: RefreshTokenScope {
@@ -20,3 +16,4 @@ public final class RefreshTokenScopes: RefreshTokenScope {
     
     public typealias RefreshTokenType = RefreshTokens
 }
+

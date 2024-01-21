@@ -50,7 +50,7 @@ let package = Package(
             ]
         ),
         .testTarget(name: "VaporOAuthTests", dependencies: [
-            .target(name: "VaporOAuth"),
+            .target(name: "Development"),
             .product(name: "XCTVapor", package: "vapor"),
 
             // Workaround for https://github.com/apple/swift-package-manager/issues/6940

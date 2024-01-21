@@ -10,9 +10,9 @@ import Foundation
 import Vapor
 import Fluent
 
-struct OAuthScopesController: RouteCollection {
+public struct OAuthScopesController: RouteCollection {
     let registerFormName: String = "oauthScopeRegisterForm"
-    func boot(routes: RoutesBuilder) throws {
+    public func boot(routes: RoutesBuilder) throws {
         let oauthScopes = routes.grouped("oauth", "scopes")
         
         oauthScopes.get("new", use: getRegisterForm(req:))

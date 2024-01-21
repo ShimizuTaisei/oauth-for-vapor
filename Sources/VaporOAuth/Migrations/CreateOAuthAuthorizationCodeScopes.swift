@@ -9,16 +9,16 @@
 import Foundation
 import Fluent
 
-struct CreateOAuthAuthorizationCodeScopes: AsyncMigration {
-    var name: String
+public struct CreateOAuthAuthorizationCodeScopes: AsyncMigration {
+    public var name: String
     var authCodeTableName: String
     
-    init(_ schema: String = "oauth_authorization_code_scopes", authCodeTableName: String) {
+    public init(_ schema: String = "oauth_authorization_code_scopes", authCodeTableName: String) {
         self.name = schema
         self.authCodeTableName = authCodeTableName
     }
     
-    func prepare(on database: Database) async throws {
+    public func prepare(on database: Database) async throws {
         try await database.schema(self.name)
             .id()
             .field("authorization_code_id", .uuid, .required, .references(self.authCodeTableName, "id", onDelete: .cascade))
@@ -27,7 +27,7 @@ struct CreateOAuthAuthorizationCodeScopes: AsyncMigration {
             .create()
     }
     
-    func revert(on database: Database) async throws {
+    public func revert(on database: Database) async throws {
         try await database.schema(self.name).delete()
     }
 }

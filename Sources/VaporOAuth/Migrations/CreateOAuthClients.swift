@@ -10,10 +10,10 @@ import Foundation
 import Vapor
 import Fluent
 
-struct CreateOAuthClients: AsyncMigration {
-    var name: String { "oauth_clients" }
+public struct CreateOAuthClients: AsyncMigration {
+    public var name: String { "oauth_clients" }
     
-    func prepare(on database: Database) async throws {
+    public func prepare(on database: Database) async throws {
         try await database.schema("oauth_clients")
             .id()
             .field("created", .string)
@@ -26,7 +26,7 @@ struct CreateOAuthClients: AsyncMigration {
             .create()
     }
     
-    func revert(on database: Database) async throws {
+    public func revert(on database: Database) async throws {
         try await database.schema("oauth_clients").delete()
     }
 }

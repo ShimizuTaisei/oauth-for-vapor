@@ -10,7 +10,7 @@ import Foundation
 import Vapor
 import Fluent
 
-public final class OAuthClients: OAuthClient {
+public final class OAuthClients: OAuthClient, Content {
     public static var schema: String = "oauth_clients"
     
     @ID(key: .id)

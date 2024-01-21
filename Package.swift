@@ -33,7 +33,7 @@ let package = Package(
                 .product(name: "FluentMySQLDriver", package: "fluent-mysql-driver"),
                 .product(name: "Vapor", package: "vapor"),
             ]),
-        .executableTarget(
+        .target(
             name: "VaporOAuth",
             dependencies: [
                 "VaporOAuthMacros",
@@ -41,6 +41,12 @@ let package = Package(
                 .product(name: "FluentMySQLDriver", package: "fluent-mysql-driver"),
                 .product(name: "Leaf", package: "leaf"),
                 .product(name: "Vapor", package: "vapor"),
+            ]
+        ),
+        .executableTarget(
+            name: "Development",
+            dependencies: [
+                .target(name: "VaporOAuth")
             ]
         ),
         .testTarget(name: "VaporOAuthTests", dependencies: [

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>教員ログイン</title>
+    </head>
+
+    <body>
+    #if(missing == "y"):
+        <p style="color: red;">ログインIDまたはパスワードが違います。</p>
+    #endif
+        <form method="POST" action="#(action)">
+            <label for="loginID">Login ID</label>
+            <input type="text" id="loginID" placeholder="Login ID", name="username" autocomplete="username", required autofocus>
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Password" name="password" autocomplete="current-password" required>
+            <input type="submit" value="Sign In">
+        </form>
+    </body>
+</html>

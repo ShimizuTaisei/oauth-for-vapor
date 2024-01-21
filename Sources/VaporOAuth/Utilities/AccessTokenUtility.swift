@@ -11,6 +11,8 @@ import Vapor
 import Fluent
 
 public class AccessTokenUtility {
+    public init() {}
+    
     public func accessTokenFromAuthCode
     <AuthCodes: AuthorizationCode, AccessTokens: AccessToken, RefreshTokens: RefreshToken>
     (req: Request, authCode: AuthCodes.Type, accessToken a: AccessTokens.Type, refreshToken r: RefreshTokens.Type) async throws -> Response {

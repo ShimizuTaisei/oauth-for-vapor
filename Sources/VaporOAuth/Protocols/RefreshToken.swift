@@ -25,4 +25,5 @@ public protocol RefreshToken: Model where IDValue == UUID {
     
     init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID)
     func setScopes(_ scopes: [OAuthScopes], on database: Database) async throws
+    static func queryRefreshToken(_ refreshToken: String, on database: Database) async throws -> Self?
 }

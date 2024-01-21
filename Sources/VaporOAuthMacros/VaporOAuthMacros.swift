@@ -197,6 +197,12 @@ public struct AuthorizationCodeModelMacro: MemberMacro {
                 try await self.$refreshToken.load(on: database)
             }
             """,
+            """
+            public func setTokens(accessTokenID: UUID, refreshTokenID: UUID) {
+                self.$accessToken.id = accessTokenID
+                self.$refreshToken.id = refreshTokenID
+            }
+            """,
         ]
     }
 }
@@ -233,6 +239,10 @@ public struct AuthorizationCodeScopeModelMacro: MemberMacro {
 
 public struct RefreshTokenModelMacro: MemberMacro {
     public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingMembersOf declaration: some SwiftSyntax.DeclGroupSyntax, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
+        guard let decl = declaration.as(ClassDeclSyntax.self) else {
+            return []
+        }
+        let name = decl.name.text
         return [
             """
             @ID(key: .id)
@@ -292,6 +302,12 @@ public struct RefreshTokenModelMacro: MemberMacro {
             """
             public func setScopes(_ scopes: [OAuthScopes], on database: Database) async throws {
                 try await self.$scopes.attach(scopes, on: database)
+            }
+            """,
+            """
+            public static func queryRefreshToken(_ refreshToken: String, on database: Database) async throws -> \(raw: name)? {
+                let refreshToken = try await \(raw: name).query(on: database).filter(\\.$refreshToken == refreshToken).with(\\.$accessToken).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
+                return refreshToken
             }
             """,
         ]

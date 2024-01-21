@@ -13,7 +13,7 @@ public struct CreateOAuthRefreshTokenScopes: AsyncMigration {
     public var name: String
     var refreshTokenTableName: String
     
-    public init(_ scheme: String, refreshTokenTableName: String) {
+    public init(_ scheme: String = "oauth_refresh_token_scopes", refreshTokenTableName: String = "oauth_refresh_tokens") {
         self.name = scheme
         self.refreshTokenTableName = refreshTokenTableName
     }

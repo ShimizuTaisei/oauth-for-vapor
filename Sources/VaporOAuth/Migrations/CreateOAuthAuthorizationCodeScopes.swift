@@ -13,7 +13,7 @@ public struct CreateOAuthAuthorizationCodeScopes: AsyncMigration {
     public var name: String
     var authCodeTableName: String
     
-    public init(_ schema: String = "oauth_authorization_code_scopes", authCodeTableName: String) {
+    public init(_ schema: String = "oauth_authorization_code_scopes", authCodeTableName: String = "oauth_authorization_codes") {
         self.name = schema
         self.authCodeTableName = authCodeTableName
     }

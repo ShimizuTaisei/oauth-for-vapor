@@ -1,4 +1,4 @@
-@testable import VaporOAuth
+@testable import Development
 import XCTVapor
 
 final class VaporOAuthTests: XCTestCase {

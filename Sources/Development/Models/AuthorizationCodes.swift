@@ -2,17 +2,13 @@
 //  AuthorizationCodes.swift
 //
 //  
-//  Created by Shimizu Taisei on 2024/01/04.
+//  Created by Shimizu Taisei on 2024/01/21.
 //  
 
 
 import Foundation
-import Vapor
 import Fluent
-import VaporOAuthMacros
-
-@attached(member, names: arbitrary)
-public macro AuthorizationCodeModel() = #externalMacro(module: "VaporOAuthMacros", type: "AuthorizationCodeModelMacro")
+import VaporOAuth
 
 @AuthorizationCodeModel
 public final class AuthorizationCodes: AuthorizationCode {

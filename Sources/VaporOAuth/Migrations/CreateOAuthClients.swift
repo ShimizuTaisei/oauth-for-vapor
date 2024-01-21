@@ -13,6 +13,10 @@ import Fluent
 public struct CreateOAuthClients: AsyncMigration {
     public var name: String { "oauth_clients" }
     
+    public init() {
+        
+    }
+    
     public func prepare(on database: Database) async throws {
         try await database.schema("oauth_clients")
             .id()

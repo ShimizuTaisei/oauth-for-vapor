@@ -11,6 +11,8 @@ import Vapor
 import Fluent
 
 public class AuthCodeUtility {
+    public init() {}
+    
     /// Validate authorization code request and create response for redirection to login form.
     /// - Parameters:
     ///   - req: Request object from route function.

@@ -13,7 +13,14 @@ import VaporOAuth
 
 struct OAuthController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
+        let oauth = routes.grouped("oauth")
+        let sessionAuth = oauth.grouped(Users.sessionAuthenticator())
+        let credentialAuth = oauth.grouped(Users.credentialsAuthenticator())
         
+        sessionAuth.get(use: getAuthTop(req:))
+        sessionAuth.get("login", use: getLoginForm(req:))
+        credentialAuth.post("login", use: postLoginForm(req:))
+        oauth.post("token", use: postTokenEndpoint(req:))
     }
     
     // MARK: - GET /oauth/

@@ -269,7 +269,7 @@ public struct RefreshTokenModelMacro: MemberMacro {
             public var refreshToken: String
             """,
             """
-            @Parent(key: "access_token")
+            @Parent(key: "access_token_id")
             public var accessToken: AccessTokenType
             """,
             """
@@ -326,7 +326,7 @@ public struct RefreshTokenScopeModelMacro: MemberMacro {
             public var refreshToken: RefreshTokenType
             """,
             """
-            @Parent(key: "refresh_token_id")
+            @Parent(key: "scope_id")
             public var scope: OAuthScopes
             """,
             """

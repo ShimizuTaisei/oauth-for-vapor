@@ -13,6 +13,10 @@ public struct CreateOAuthRefreshTokenScopes: AsyncMigration {
     public var name: String
     var refreshTokenTableName: String
     
+    /// init
+    /// - Parameters:
+    ///   - scheme: The name of table to create.
+    ///   - refreshTokenTableName: The name of refresh-token table which refered from this table.
     public init(_ scheme: String = "oauth_refresh_token_scopes", refreshTokenTableName: String = "oauth_refresh_tokens") {
         self.name = scheme
         self.refreshTokenTableName = refreshTokenTableName

@@ -13,6 +13,10 @@ public struct CreateOAuthAuthorizationCodeScopes: AsyncMigration {
     public var name: String
     var authCodeTableName: String
     
+    /// init
+    /// - Parameters:
+    ///   - schema: The name of table to create.
+    ///   - authCodeTableName: The name of authorization-code table which is refered from this table.
     public init(_ schema: String = "oauth_authorization_code_scopes", authCodeTableName: String = "oauth_authorization_codes") {
         self.name = schema
         self.authCodeTableName = authCodeTableName

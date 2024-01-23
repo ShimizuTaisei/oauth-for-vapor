@@ -13,9 +13,16 @@ import Fluent
 public class AccessTokenUtility {
     public init() {}
     
+    /// Issue access token based on authorization code.
+    /// - Parameters:
+    ///   - req: The request object from route function.
+    ///   - authCode: The type of authorization-code model.
+    ///   - accessToken: The type of access-token model.
+    ///   - refreshToken: The type of refresh-token model.
+    /// - Returns: The response with access token.
     public func accessTokenFromAuthCode
     <AuthCodes: AuthorizationCode, AccessTokens: AccessToken, RefreshTokens: RefreshToken>
-    (req: Request, authCode: AuthCodes.Type, accessToken a: AccessTokens.Type, refreshToken r: RefreshTokens.Type) async throws -> Response {
+    (req: Request, authCode: AuthCodes.Type, accessToken: AccessTokens.Type, refreshToken: RefreshTokens.Type) async throws -> Response {
         let requestParams = try req.content.decode(AccessTokenFromAuthorizationCodeRequest.self)
         guard let authCode = try await AuthCodes.queryByAuthCode(on: req.db, code: requestParams.code) else {
             return try accessTokenError(req: req, statusCode: .unauthorized, error: .invalidGrant, description: "Missing or invalid code.")
@@ -74,7 +81,13 @@ public class AccessTokenUtility {
         return Response(status: .ok, headers: headers, body: .init(data: body))
     }
     
-    public func accessTokenFromRefreshToken<AccessTokens: AccessToken, RefreshTokens: RefreshToken>(req: Request, accessToken a: AccessTokens.Type, refreshToken r: RefreshTokens.Type) async throws -> Response {
+    /// Issue access-token based on refresh-token.
+    /// - Parameters:
+    ///   - req: The request object from route function.
+    ///   - accessToken: The type of access-token model.
+    ///   - refreshToken: The type of refresh-token model.
+    /// - Returns: The response with access-token.
+    public func accessTokenFromRefreshToken<AccessTokens: AccessToken, RefreshTokens: RefreshToken>(req: Request, accessToken: AccessTokens.Type, refreshToken: RefreshTokens.Type) async throws -> Response {
         let requestParams = try req.content.decode(AccessTokenFromRefreshTokenRequest.self)
         guard let refreshToken = try await RefreshTokens.queryRefreshToken(requestParams.refresh_token, on: req.db) else {
             return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidRequest, description: "Invalid refresh_token")

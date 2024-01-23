@@ -17,6 +17,13 @@ public struct CreateOAuthAuthorizationCodes: AsyncMigration {
     var accessTokenTableName: String
     var refreshTokenTableName: String
     
+    /// init
+    /// - Parameters:
+    ///   - schema: The name of table to create
+    ///   - userTableName: The name of user table which is refered from this table.
+    ///   - userTableIdFiled: The name of field which contain user id.
+    ///   - accessTokenTableName: The name of access-token table which is refered from this table.
+    ///   - refreshTokenTableName: The name of refresh-token table which is refered from this table.
     public init(_ schema: String = "oauth_authorization_codes", userTableName: String, userTableIdFiled: FieldKey,
          accessTokenTableName: String = "oauth_access_tokens", refreshTokenTableName: String = "oauth_refresh_tokens") {
         self.name = schema

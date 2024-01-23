@@ -25,7 +25,7 @@ struct OAuthController: RouteCollection {
     
     // MARK: - GET /oauth/
     func getAuthTop(req: Request) async throws -> Response {
-        return try await AuthCodeUtility().validateAuthRequest(req: req, redirectURI: "/oauth/login")
+        return try await AuthCodeUtility().validateAuthRequest(req: req, redirectURI: "/oauth/login/")
     }
     
     // MARK: - GET /oauth/login/
@@ -35,6 +35,11 @@ struct OAuthController: RouteCollection {
     
     // MARK: - POST /oauth/login/
     func postLoginForm(req: Request) async throws -> Response {
+        do {
+            let _ = try req.auth.require(Users.self)
+        } catch {
+            return req.redirect(to: "/oauth/login/", redirectType: .normal)
+        }
         return try await AuthCodeUtility().issueAuthCode(req: req, type: AuthorizationCodes.self)
     }
     

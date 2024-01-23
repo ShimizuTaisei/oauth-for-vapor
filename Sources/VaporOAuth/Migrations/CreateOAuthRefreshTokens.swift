@@ -16,6 +16,12 @@ public struct CreateOAuthRefreshTokens: AsyncMigration {
     var userTableIdField: FieldKey
     var accessTokenTableName: String
     
+    /// init
+    /// - Parameters:
+    ///   - schema: The name of table to create.
+    ///   - userTableName: The name of user table which is refered from this table.
+    ///   - userTableIdField: The name of field which contain user id.
+    ///   - accessTokenTableName: The name of access-token table which is refered from this table.
     public init(_ schema: String = "oauth_refresh_tokens", userTableName: String, userTableIdField: FieldKey,
          accessTokenTableName: String = "oauth_access_tokens") {
         self.name = schema

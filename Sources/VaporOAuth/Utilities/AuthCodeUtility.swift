@@ -21,27 +21,27 @@ public class AuthCodeUtility {
     public func validateAuthRequest(req: Request, redirectURI: String) async throws -> Response {
         let queryParams = try req.query.decode(AuthorizationRequest.self)
         guard let clientUUID = UUID(uuidString: queryParams.client_id) else {
-            return try buildAuthCodeError(req: req, redirectURI: nil, isInvalidRedirectURI: true, state: queryParams.state, error: .invalidRequest, description: "Invalid client_id")
+            return try authCodeError(req: req, redirectURI: nil, isInvalidRedirectURI: true, state: queryParams.state, error: .invalidRequest, description: "Invalid client_id")
         }
         let client = try await OAuthClients.find(clientUUID, on: req.db)
         
         // Check whether redirect_uri is correct.
         guard let _ = client?.redirectURIs.first(where: { $0 == queryParams.redirect_uri }) else {
-            return try buildAuthCodeError(req: req, redirectURI: nil, isInvalidRedirectURI: true, state: queryParams.state, error: .invalidRequest, description: "Invalid redirect_uri.")
+            return try authCodeError(req: req, redirectURI: nil, isInvalidRedirectURI: true, state: queryParams.state, error: .invalidRequest, description: "Invalid redirect_uri.")
         }
         
         // Check whether response_type is "code"
         guard queryParams.response_type == "code" else {
-            return try buildAuthCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .unsupportedResponseType, description: "The \"response_type\" must be set to \"code\".")
+            return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .unsupportedResponseType, description: "The \"response_type\" must be set to \"code\".")
         }
         
         let scopeStrings = queryParams.scope?.components(separatedBy: " ") ?? []
         guard let scopes = try? await OAuthScopes.query(on: req.db).filter(\.$name ~~ scopeStrings).all() else {
-            return try buildAuthCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidScope, description: "Not found scope (DB query failed).")
+            return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidScope, description: "Not found scope (DB query failed).")
         }
         
         guard scopes.count > 0 else {
-            return try buildAuthCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidScope, description: "Not found scope (scope count is 0).")
+            return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidScope, description: "Not found scope (scope count is 0).")
         }
         
         req.session.data["response_type"] = queryParams.response_type
@@ -60,25 +60,25 @@ public class AuthCodeUtility {
         let state = req.session.data["state"]
         
         guard let redirectURI = req.session.data["redirect_uri"] else {
-            return try buildAuthCodeError(req: req, redirectURI: nil, isInvalidRedirectURI: true, state: state, error: .invalidRequest, description: "Invalid redirect_uri")
+            return try authCodeError(req: req, redirectURI: nil, isInvalidRedirectURI: true, state: state, error: .invalidRequest, description: "Invalid redirect_uri")
         }
         
         guard let clientID = req.session.data["client_id"] else {
-            return try buildAuthCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidRequest, description: "Invalid client_id")
+            return try authCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidRequest, description: "Invalid client_id")
         }
         let clientUUID = UUID(uuidString: clientID)
         guard let client = try await OAuthClients.find(clientUUID, on: req.db) else {
-            return try buildAuthCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidRequest, description: "Invalid client_id")
+            return try authCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidRequest, description: "Invalid client_id")
         }
         
         let user = try req.auth.require(AuthCodes.User.self)
         
         let scopeStrings = req.session.data["scope"]?.components(separatedBy: " ") ?? []
         guard let scopes = try? await OAuthScopes.query(on: req.db).filter(\.$name ~~ scopeStrings).all() else {
-            return try buildAuthCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidScope, description: "Not found scope")
+            return try authCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidScope, description: "Not found scope")
         }
         guard scopes.count > 0 else {
-            return try buildAuthCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidScope, description: "Not found scope")
+            return try authCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidScope, description: "Not found scope")
         }
         
         let authorizationCode: AuthCodes = try generateAuthorizationCode(userID: user.requireID(), clientID: client.requireID(), redirectURI: redirectURI)
@@ -97,7 +97,7 @@ public class AuthCodeUtility {
         var state: String?
     }
     
-    private func buildAuthCodeError(req: Request, statusCode: HTTPResponseStatus = .badRequest, redirectURI: String?,
+    private func authCodeError(req: Request, statusCode: HTTPResponseStatus = .badRequest, redirectURI: String?,
                                     isInvalidRedirectURI: Bool, state: String?, error: AuthorizationCodeError, description: String? = nil, errorURI: String? = nil) throws -> Response {
         if isInvalidRedirectURI {
             throw Abort(.badRequest, reason: description ?? "Missing or invalid redirect_uri")

@@ -269,7 +269,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
             @Field(key: "refresh_token")
             public var refreshToken: String
 
-            @Parent(key: "access_token")
+            @Parent(key: "access_token_id")
             public var accessToken: AccessTokenType
 
             @Parent(key: "user_id")
@@ -326,7 +326,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
             @Parent(key: "refresh_token_id")
             public var refreshToken: RefreshTokenType
 
-            @Parent(key: "refresh_token_id")
+            @Parent(key: "scope_id")
             public var scope: OAuthScopes
 
             public init(refreshTokenID: RefreshTokenType.IDValue, scopeID: OAuthScopes.IDValue) {

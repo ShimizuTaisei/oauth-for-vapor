@@ -105,7 +105,7 @@ public class AuthCodeUtility {
             let errorObject = AuthorizationCodeErrorResponse(error: error.rawValue, error_description: description, error_uri: errorURI, state: state)
             let queryString = try URLEncodedFormEncoder().encode(errorObject)
             if let redirectURI = redirectURI {
-                return req.redirect(to: "\(redirectURI)/\(queryString)")
+                return req.redirect(to: "\(redirectURI)?\(queryString)")
             } else {
                 throw Abort(.internalServerError, reason: "Error at redirection")
             }

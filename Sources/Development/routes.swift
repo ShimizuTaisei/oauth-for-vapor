@@ -14,4 +14,5 @@ func routes(_ app: Application) throws {
     
     try app.register(collection: OAuthClientsController())
     try app.register(collection: OAuthScopesController())
+    try app.register(collection: OAuthController())
 }

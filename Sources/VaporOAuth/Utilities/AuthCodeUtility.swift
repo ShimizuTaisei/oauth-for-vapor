@@ -87,7 +87,7 @@ public class AuthCodeUtility {
         
         let authCodeResponse = AuthCodeResponse(code: authorizationCode.code, state: state)
         let queryParams = try URLEncodedFormEncoder().encode(authCodeResponse)
-        let httpResponse = req.redirect(to: "\(redirectURI)/\(queryParams)")
+        let httpResponse = req.redirect(to: "\(redirectURI)?\(queryParams)")
         httpResponse.status = .found
         return httpResponse
     }

@@ -3,7 +3,7 @@ import PackageDescription
 import CompilerPluginSupport
 
 let package = Package(
-    name: "VaporOAuth",
+    name: "oauth-for-vapor",
     platforms: [
         .macOS(.v13)
     ], 

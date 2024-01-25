@@ -25,6 +25,6 @@ let package = Package(
 ```
 
 ### Import
-```swift:ImportExample
+```swift:ImportExample.swift
 import VaporOAuth
 ```

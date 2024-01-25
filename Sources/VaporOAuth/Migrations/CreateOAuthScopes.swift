@@ -10,6 +10,7 @@ import Foundation
 import Vapor
 import Fluent
 
+/// Create table which stores scopes.
 public struct CreateOAuthScopes: AsyncMigration {
     public var name: String { "CreateOAuthScopes" }
     

@@ -9,11 +9,12 @@
 import Foundation
 import Fluent
 
+/// Create a table which relates access-token and scopes.
 public struct CreateOAuthAccessTokenScopes: AsyncMigration {
     public var name: String
     var accessTokenTableName: String
     
-    /// init
+    ///
     /// - Parameters:
     ///   - schema: The name of table to create.
     ///   - accessTokenTableName: The name of access-token table which is refered from this table.

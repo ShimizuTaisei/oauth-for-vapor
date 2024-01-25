@@ -10,12 +10,13 @@ import Foundation
 import Vapor
 import Fluent
 
+/// Create table which stores access-token.
 public struct CreateOAuthAccessTokens: AsyncMigration {
     public var name: String
     var userTableName: String
     var userTableIdFiled: FieldKey
     
-    /// The initializer.
+    /// 
     /// - Parameters:
     ///   - schema: The name of table to create.
     ///   - userTableName: The name of user table which is related to access-token.

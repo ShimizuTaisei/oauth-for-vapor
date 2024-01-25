@@ -9,11 +9,12 @@
 import Foundation
 import Fluent
 
+/// Create table which relates authorization-code and scope.
 public struct CreateOAuthAuthorizationCodeScopes: AsyncMigration {
     public var name: String
     var authCodeTableName: String
     
-    /// init
+    ///
     /// - Parameters:
     ///   - schema: The name of table to create.
     ///   - authCodeTableName: The name of authorization-code table which is refered from this table.

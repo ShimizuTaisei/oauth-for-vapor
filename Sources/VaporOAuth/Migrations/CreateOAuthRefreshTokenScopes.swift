@@ -9,11 +9,12 @@
 import Foundation
 import Fluent
 
+/// Create table which relates refresh-token and scope.
 public struct CreateOAuthRefreshTokenScopes: AsyncMigration {
     public var name: String
     var refreshTokenTableName: String
     
-    /// init
+    ///
     /// - Parameters:
     ///   - scheme: The name of table to create.
     ///   - refreshTokenTableName: The name of refresh-token table which refered from this table.

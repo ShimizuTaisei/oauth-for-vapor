@@ -10,6 +10,7 @@ import Foundation
 import Vapor
 import Fluent
 
+/// Create table which stores clients.
 public struct CreateOAuthClients: AsyncMigration {
     public var name: String { "oauth_clients" }
     

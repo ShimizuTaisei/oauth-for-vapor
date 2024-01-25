@@ -10,6 +10,7 @@ import Foundation
 import Vapor
 import Fluent
 
+/// Create table which stores authorization-code.
 public struct CreateOAuthAuthorizationCodes: AsyncMigration {
     public var name: String
     var userTableName: String
@@ -17,7 +18,7 @@ public struct CreateOAuthAuthorizationCodes: AsyncMigration {
     var accessTokenTableName: String
     var refreshTokenTableName: String
     
-    /// init
+    ///
     /// - Parameters:
     ///   - schema: The name of table to create
     ///   - userTableName: The name of user table which is refered from this table.

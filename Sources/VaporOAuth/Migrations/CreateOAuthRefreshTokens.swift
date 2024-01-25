@@ -10,13 +10,14 @@ import Foundation
 import Vapor
 import Fluent
 
+/// Create table which stores refresh-token.
 public struct CreateOAuthRefreshTokens: AsyncMigration {
     public var name: String
     var userTableName: String
     var userTableIdField: FieldKey
     var accessTokenTableName: String
     
-    /// init
+    ///
     /// - Parameters:
     ///   - schema: The name of table to create.
     ///   - userTableName: The name of user table which is refered from this table.

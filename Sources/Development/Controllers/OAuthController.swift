@@ -58,7 +58,3 @@ struct OAuthController: RouteCollection {
         }
     }
 }
-
-struct AccessTokenRequest: Content {
-    var grant_type: String
-}

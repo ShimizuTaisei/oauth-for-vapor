@@ -9,7 +9,9 @@
 import Foundation
 import Fluent
 
+/// A protocol that defines members for table which associates authorization-code and scopes.
 public protocol AuthorizationCodeScope: Model {
+    /// The type of authorization code table. It should conform to ``AuthorizationCode``
     associatedtype AuthorizationCodeType: AuthorizationCode
     
     var authorizationCode: AuthorizationCodeType { get set }

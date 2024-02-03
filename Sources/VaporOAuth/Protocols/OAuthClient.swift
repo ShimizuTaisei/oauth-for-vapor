@@ -9,6 +9,7 @@
 import Foundation
 import Fluent
 
+/// A protocol that defines members for table which stores information of OAuth clients.
 public protocol OAuthClient: Model {
     var created: Date? { get set }
     var modified: Date? { get set }

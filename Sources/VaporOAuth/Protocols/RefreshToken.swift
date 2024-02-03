@@ -9,8 +9,12 @@
 import Foundation
 import Fluent
 
+/// A protocol that defines members for table which stores refresh tokens.
 public protocol RefreshToken: Model where IDValue == UUID {
+    /// The type of user which is related to refresh token.
     associatedtype User: Model
+    
+    /// The type of access token which is refered from this table.
     associatedtype AccessTokenType: AccessToken
     
     var created: Date? { get set }
@@ -23,7 +27,27 @@ public protocol RefreshToken: Model where IDValue == UUID {
     var client: OAuthClients { get set }
     var scopes: [OAuthScopes] { get set }
     
+    ///
+    /// - Parameters:
+    ///   - expired: Tha date when the refresh token will be expired.
+    ///   - refreshToken: The body of refresh token.
+    ///   - accessTokenID: The ID of access token which refered from this record. Mostly the access token is created in same time with refresh token.
+    ///   - userID: The ID of user who was related to this record.
+    ///   - clientID: The ID of client which was related to this record.
     init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID)
+    
+    
+    /// Set list of scopes to this record.
+    /// - Parameters:
+    ///   - scopes: The list of scopes which should be attached to this record.
+    ///   - database: The database object.
     func setScopes(_ scopes: [OAuthScopes], on database: Database) async throws
+    
+    
+    /// Search instance of class which conforms to ``RefreshToken`` and return it.
+    /// - Parameters:
+    ///   - refreshToken: The refresh token which is used to query database. Mostly, it is contained in token refreshing request.
+    ///   - database: The database objects.
+    /// - Returns: The query result that is instance of class which conforms to ``RefreshToken``.
     static func queryRefreshToken(_ refreshToken: String, on database: Database) async throws -> Self?
 }

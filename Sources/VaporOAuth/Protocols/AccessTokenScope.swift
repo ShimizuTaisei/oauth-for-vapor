@@ -9,7 +9,9 @@
 import Foundation
 import Fluent
 
+/// A protocol that defines menbers for table which associates access-token and scopes.
 public protocol AccessTokenScope: Model {
+    /// The type of access token table. It should conform to ``AccessToken``.
     associatedtype AccessTokenType: AccessToken
     
     var accessToken: AccessTokenType { get set }

@@ -81,11 +81,11 @@ public class AuthCodeUtility {
             return try authCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidScope, description: "Not found scope")
         }
         
-        let authorizationCode: AuthCodes = try generateAuthorizationCode(userID: user.requireID(), clientID: client.requireID(), redirectURI: redirectURI)
-        try await authorizationCode.save(on: req.db)
-        try await authorizationCode.setScopes(scopes, on: req.db)
+        let (oauthAuthorizationCode, authCode): (AuthCodes, String) = try generateAuthorizationCode(userID: user.requireID(), clientID: client.requireID(), redirectURI: redirectURI)
+        try await oauthAuthorizationCode.save(on: req.db)
+        try await oauthAuthorizationCode.setScopes(scopes, on: req.db)
         
-        let authCodeResponse = AuthCodeResponse(code: authorizationCode.code, state: state)
+        let authCodeResponse = AuthCodeResponse(code: authCode, state: state)
         let queryParams = try URLEncodedFormEncoder().encode(authCodeResponse)
         let httpResponse = req.redirect(to: "\(redirectURI)?\(queryParams)")
         httpResponse.status = .found
@@ -112,13 +112,13 @@ public class AuthCodeUtility {
         }
     }
     
-    private func generateAuthorizationCode<AuthCodes: AuthorizationCode>(userID: AuthCodes.User.IDValue, clientID: OAuthClients.IDValue, redirectURI: String) throws -> AuthCodes {
+    private func generateAuthorizationCode<AuthCodes: AuthorizationCode>(userID: AuthCodes.User.IDValue, clientID: OAuthClients.IDValue, redirectURI: String) throws -> (AuthCodes, String) {
         let code = [UInt8].random(count: 64).base64.replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
         guard let expiresDate = Calendar.current.date(byAdding: .minute, value: 3, to: Date()) else {
             throw Abort(.internalServerError, reason: "Couldn't get expires date.")
         }
         let authCodes = AuthCodes(expired: expiresDate, code: code, redirectURI: redirectURI, clientID: clientID, userID: userID)
-        return authCodes
+        return (authCodes, code)
     }
     
     

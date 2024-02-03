@@ -11,6 +11,7 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
+// MARK: - AccessTokens
 public struct AccessTokenModelMacro: MemberMacro {
     public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingMembersOf declaration: some SwiftSyntax.DeclGroupSyntax, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
         return [
@@ -54,7 +55,7 @@ public struct AccessTokenModelMacro: MemberMacro {
             public init(expired: Date, accessToken: String, userID: User.IDValue, clientID: OAuthClients.IDValue) {
                 self.expired = expired
                 self.isRevoked = false
-                self.accessToken = accessToken
+                self.accessToken = SHA512.hash(data: Data(accessToken.utf8)).hexEncodedString()
                 self.$user.id = userID
                 self.$client.id = clientID
             }
@@ -73,6 +74,7 @@ public struct AccessTokenModelMacro: MemberMacro {
     }
 }
 
+// MARK: - AccessTokenScopes
 public struct AccesstokenScopeModelMacro: MemberMacro {
     public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingMembersOf declaration: some SwiftSyntax.DeclGroupSyntax, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
         
@@ -104,6 +106,7 @@ public struct AccesstokenScopeModelMacro: MemberMacro {
     }
 }
 
+// MARK: - AuthorizationCodes
 public struct AuthorizationCodeModelMacro: MemberMacro {
     public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingMembersOf declaration: some SwiftSyntax.DeclGroupSyntax, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
         guard let decl = declaration.as(ClassDeclSyntax.self) else {
@@ -169,7 +172,7 @@ public struct AuthorizationCodeModelMacro: MemberMacro {
                 self.expired = expired
                 self.isRevoked = false
                 self.isUsed = false
-                self.code = code
+                self.code = SHA512.hash(data: Data(code.utf8)).hexEncodedString()
                 self.redirectURI = redirectURI
                 self.$client.id = clientID
                 self.$user.id = userID
@@ -207,6 +210,7 @@ public struct AuthorizationCodeModelMacro: MemberMacro {
     }
 }
 
+// MARK: - AuthorizationCodeScopes
 public struct AuthorizationCodeScopeModelMacro: MemberMacro {
     public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingMembersOf declaration: some SwiftSyntax.DeclGroupSyntax, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
         return [
@@ -237,6 +241,7 @@ public struct AuthorizationCodeScopeModelMacro: MemberMacro {
     }
 }
 
+// MARK: - RefreshTokens
 public struct RefreshTokenModelMacro: MemberMacro {
     public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingMembersOf declaration: some SwiftSyntax.DeclGroupSyntax, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
         guard let decl = declaration.as(ClassDeclSyntax.self) else {
@@ -288,7 +293,7 @@ public struct RefreshTokenModelMacro: MemberMacro {
             public init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID) {
                 self.expired = expired
                 self.isRevoked = false
-                self.refreshToken = refreshToken
+                self.refreshToken = SHA512.hash(data: Data(refreshToken.utf8)).hexEncodedString()
                 self.$accessToken.id = accessTokenID
                 self.$user.id = userID
                 self.$client.id = clientID
@@ -314,6 +319,7 @@ public struct RefreshTokenModelMacro: MemberMacro {
     }
 }
 
+// MARK: - RefreshTokenScopes
 public struct RefreshTokenScopeModelMacro: MemberMacro {
     public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingMembersOf declaration: some SwiftSyntax.DeclGroupSyntax, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
         return [

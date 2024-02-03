@@ -24,7 +24,8 @@ public class AccessTokenUtility {
     <AuthCodes: AuthorizationCode, AccessTokens: AccessToken, RefreshTokens: RefreshToken>
     (req: Request, authCode: AuthCodes.Type, accessToken: AccessTokens.Type, refreshToken: RefreshTokens.Type) async throws -> Response {
         let requestParams = try req.content.decode(AccessTokenFromAuthorizationCodeRequest.self)
-        guard let authCode = try await AuthCodes.queryByAuthCode(on: req.db, code: requestParams.code) else {
+        let hashedCode = SHA512.hash(data: Data(requestParams.code.utf8)).hexEncodedString()
+        guard let authCode = try await AuthCodes.queryByAuthCode(on: req.db, code: hashedCode) else {
             return try accessTokenError(req: req, statusCode: .unauthorized, error: .invalidGrant, description: "Missing or invalid code.")
         }
         
@@ -89,7 +90,8 @@ public class AccessTokenUtility {
     /// - Returns: The response with access-token.
     public func accessTokenFromRefreshToken<AccessTokens: AccessToken, RefreshTokens: RefreshToken>(req: Request, accessToken: AccessTokens.Type, refreshToken: RefreshTokens.Type) async throws -> Response {
         let requestParams = try req.content.decode(AccessTokenFromRefreshTokenRequest.self)
-        guard let refreshToken = try await RefreshTokens.queryRefreshToken(requestParams.refresh_token, on: req.db) else {
+        let hashedRefreshToken = SHA512.hash(data: Data(requestParams.refresh_token.utf8)).hexEncodedString()
+        guard let refreshToken = try await RefreshTokens.queryRefreshToken(hashedRefreshToken, on: req.db) else {
             return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidRequest, description: "Invalid refresh_token")
         }
         if refreshToken.isRevoked {
@@ -123,43 +125,43 @@ public class AccessTokenUtility {
     private func buildAccessTokens
     <AccessTokens: AccessToken, RefreshTokens: RefreshToken>
     (req: Request, userID: AccessTokens.User.IDValue, clientID: OAuthClients.IDValue, scopes: [OAuthScopes]) async throws -> (AccessTokenResponse, AccessTokens, RefreshTokens) {
-        let (accessToken, expiresIn): (AccessTokens, Int) = generateAccessToken(userID: userID, clientID: clientID)
-        try await accessToken.save(on: req.db)
+        let (oauthAccessToken, accessToken, expiresIn): (AccessTokens, String, Int) = generateAccessToken(userID: userID, clientID: clientID)
+        try await oauthAccessToken.save(on: req.db)
         
-        let refreshToken: RefreshTokens = try generateRefreshToken(accessToken: accessToken, userID: userID, clientID: clientID)
-        try await refreshToken.save(on: req.db)
+        let (oauthRefreshToken, refreshToken): (RefreshTokens, String) = try generateRefreshToken(accessToken: oauthAccessToken, userID: userID, clientID: clientID)
+        try await oauthRefreshToken.save(on: req.db)
         
-        try await accessToken.setScope(scopes, on: req.db)
-        try await refreshToken.setScopes(scopes, on: req.db)
+        try await oauthAccessToken.setScope(scopes, on: req.db)
+        try await oauthRefreshToken.setScopes(scopes, on: req.db)
         
-        try await accessToken.save(on: req.db)
-        try await refreshToken.save(on: req.db)
+        try await oauthAccessToken.save(on: req.db)
+        try await oauthRefreshToken.save(on: req.db)
         
         var scopeStrings = ""
         for scope in scopes {
             scopeStrings += "\(scope.name) "
         }
-        let accessTokenResponse = AccessTokenResponse(access_token: accessToken.accessToken, token_type: "bearer", expires_in: expiresIn, refresh_token: refreshToken.refreshToken, scope: scopeStrings)
-        return (accessTokenResponse, accessToken, refreshToken)
+        let accessTokenResponse = AccessTokenResponse(access_token: accessToken, token_type: "bearer", expires_in: expiresIn, refresh_token: refreshToken, scope: scopeStrings)
+        return (accessTokenResponse, oauthAccessToken, oauthRefreshToken)
     }
     
-    private func generateAccessToken<AccessTokens: AccessToken>(userID: AccessTokens.User.IDValue,clientID: UUID) -> (AccessTokens, Int) {
+    private func generateAccessToken<AccessTokens: AccessToken>(userID: AccessTokens.User.IDValue,clientID: UUID) -> (AccessTokens, String, Int) {
         let accessToken = [UInt8].random(count: 64).base64.replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
         let expiresIn = 60 * 60
         let expired = Date().addingTimeInterval(TimeInterval(expiresIn))
         
         let oauthAccessToken = AccessTokens(expired: expired, accessToken: accessToken, userID: userID, clientID: clientID)
-        return (oauthAccessToken, expiresIn)
+        return (oauthAccessToken, accessToken, expiresIn)
     }
     
     private func generateRefreshToken<AccessTokens: AccessToken, RefreshTokens: RefreshToken>
-    (accessToken: AccessTokens, userID: AccessTokens.User.IDValue, clientID: UUID) throws -> RefreshTokens {
+    (accessToken: AccessTokens, userID: AccessTokens.User.IDValue, clientID: UUID) throws -> (RefreshTokens, String) {
         let refreshToken = [UInt8].random(count: 64).base64.replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
         let expiresIn = 60 * 60 * 24 * 7
         let expired = Date().addingTimeInterval(TimeInterval(expiresIn))
         
         let oauthRefreshToken = try RefreshTokens(expired: expired, refreshToken: refreshToken, accessTokenID: accessToken.requireID(), userID: userID as! RefreshTokens.User.IDValue, clientID: clientID)
-        return oauthRefreshToken
+        return (oauthRefreshToken, refreshToken)
     }
     
     private func accessTokenError(req: Request, statusCode: HTTPResponseStatus, error: AccessTokenError, description: String?, errorURI: String? = nil) throws -> Response {

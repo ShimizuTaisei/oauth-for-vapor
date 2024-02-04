@@ -350,6 +350,29 @@ public struct RefreshTokenScopeModelMacro: MemberMacro {
     }
 }
 
+// MARK: Authenticator
+public struct AccessTokenAuthenticatorMacro: ExtensionMacro {
+    public static func expansion(of node: SwiftSyntax.AttributeSyntax, attachedTo declaration: some SwiftSyntax.DeclGroupSyntax, providingExtensionsOf type: some SwiftSyntax.TypeSyntaxProtocol, conformingTo protocols: [SwiftSyntax.TypeSyntax], in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
+        let syntax = try ExtensionDeclSyntax("""
+            extension \(type.trimmed): AsyncBearerAuthenticator {
+                func authenticate(bearer: Vapor.BearerAuthorization, for request: Vapor.Request) async throws {
+                    let hashedToken = SHA512.hash(data: bearer.token.data(using: .utf8)!).hexEncodedString()
+                    let accessTokens = try await AccessTokens.query(on: request.db).filter(\\.$accessToken == hashedToken).with(\\.$user).all()
+                    guard accessTokens.count == 1, let accessToken = accessTokens.first else {
+                        throw Abort(.unauthorized)
+                    }
+                    if accessToken.accessToken == hashedToken {
+                        request.auth.login(accessToken.user)
+                    }
+                }
+
+            }
+            """)
+        
+        return [syntax]
+    }
+}
+
 @main
 struct VaporOAuthMacroPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
@@ -358,7 +381,8 @@ struct VaporOAuthMacroPlugin: CompilerPlugin {
         AuthorizationCodeModelMacro.self,
         AuthorizationCodeScopeModelMacro.self,
         RefreshTokenModelMacro.self,
-        RefreshTokenScopeModelMacro.self
+        RefreshTokenScopeModelMacro.self,
+        AccessTokenAuthenticatorMacro.self
     ]
 }
 

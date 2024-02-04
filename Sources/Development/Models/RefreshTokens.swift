@@ -9,6 +9,7 @@
 import Foundation
 import Fluent
 import VaporOAuth
+import Crypto
 
 @RefreshTokenModel
 public final class RefreshTokens: RefreshToken {

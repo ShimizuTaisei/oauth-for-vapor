@@ -15,7 +15,10 @@ struct UsersController: RouteCollection {
         let users = routes.grouped("users")
         let sessionAuth = users.grouped(Users.sessionAuthenticator())
         let credentialAuth = sessionAuth.grouped(Users.credentialsAuthenticator())
-        sessionAuth.get(use: getTop(req:))
+        let tokenAuth = users.grouped(UserAuthenticator())
+        
+        tokenAuth.get(use: getTop(req:))
+//        sessionAuth.get(use: getTop(req:))
         sessionAuth.get("login", use: getLoginForm(req:))
         
         credentialAuth.post("login", use: postLoginForm(req:))

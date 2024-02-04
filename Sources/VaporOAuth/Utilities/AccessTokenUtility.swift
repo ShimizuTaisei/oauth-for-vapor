@@ -9,6 +9,7 @@
 import Foundation
 import Vapor
 import Fluent
+import Crypto
 
 public class AccessTokenUtility {
     public init() {}

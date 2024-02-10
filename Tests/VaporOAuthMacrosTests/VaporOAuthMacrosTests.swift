@@ -58,7 +58,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public init(expired: Date, accessToken: String, userID: User.IDValue, clientID: OAuthClients.IDValue) {
                 self.expired = expired
                 self.isRevoked = false
-                self.accessToken = accessToken
+                self.accessToken = SHA512.hash(data: Data(accessToken.utf8)).hexEncodedString()
                 self.$user.id = userID
                 self.$client.id = clientID
             }
@@ -292,7 +292,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID) {
                 self.expired = expired
                 self.isRevoked = false
-                self.refreshToken = refreshToken
+                self.refreshToken = SHA512.hash(data: Data(refreshToken.utf8)).hexEncodedString()
                 self.$accessToken.id = accessTokenID
                 self.$user.id = userID
                 self.$client.id = clientID

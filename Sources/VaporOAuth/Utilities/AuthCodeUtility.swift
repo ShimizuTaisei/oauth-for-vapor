@@ -45,9 +45,19 @@ public class AuthCodeUtility {
             return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidScope, description: "Not found scope (scope count is 0).")
         }
         
+        guard let codeChallenge = queryParams.code_challenge else {
+            return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidRequest, description: "Request must contain \"code_challenge\"")
+        }
+        
+        guard let codeChallengeMethod = queryParams.code_challenge_method else {
+            return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidRequest, description: "Request must contain \"code_challenge_method\"")
+        }
+        
         req.session.data["response_type"] = queryParams.response_type
         req.session.data["client_id"] = queryParams.client_id
         req.session.data["redirect_uri"] = queryParams.redirect_uri
+        req.session.data["code_challenge"] = codeChallenge
+        req.session.data["code_challenge_method"] = codeChallengeMethod
         req.session.data["scope"] = queryParams.scope
         req.session.data["state"] = queryParams.state
         
@@ -59,6 +69,12 @@ public class AuthCodeUtility {
     /// - Returns: The resonse which redirect user to given redirect-uri.
     public func issueAuthCode<AuthCodes: AuthorizationCode>(req: Request, type: AuthCodes.Type) async throws -> Response {
         let state = req.session.data["state"]
+        guard let codeChallenge = req.session.data["code_challenge"] else {
+            throw Abort(.badRequest, reason: "Not found \"code_challenge\" in request")
+        }
+        guard let codeChallengeMethod = req.session.data["code_challenge_method"] else {
+            throw Abort(.badRequest, reason: "Not found \"code_challenge\" in request")
+        }
         
         guard let redirectURI = req.session.data["redirect_uri"] else {
             return try authCodeError(req: req, redirectURI: nil, isInvalidRedirectURI: true, state: state, error: .invalidRequest, description: "Invalid redirect_uri")
@@ -82,7 +98,7 @@ public class AuthCodeUtility {
             return try authCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidScope, description: "Not found scope")
         }
         
-        let (oauthAuthorizationCode, authCode): (AuthCodes, String) = try generateAuthorizationCode(userID: user.requireID(), clientID: client.requireID(), redirectURI: redirectURI)
+        let (oauthAuthorizationCode, authCode): (AuthCodes, String) = try generateAuthorizationCode(userID: user.requireID(), clientID: client.requireID(), redirectURI: redirectURI, codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
         try await oauthAuthorizationCode.save(on: req.db)
         try await oauthAuthorizationCode.setScopes(scopes, on: req.db)
         
@@ -113,12 +129,16 @@ public class AuthCodeUtility {
         }
     }
     
-    private func generateAuthorizationCode<AuthCodes: AuthorizationCode>(userID: AuthCodes.User.IDValue, clientID: OAuthClients.IDValue, redirectURI: String) throws -> (AuthCodes, String) {
+    private func generateAuthorizationCode<AuthCodes: AuthorizationCode>(userID: AuthCodes.User.IDValue,
+                                                                         clientID: OAuthClients.IDValue,
+                                                                         redirectURI: String,
+                                                                         codeChallenge: String,
+                                                                         codeChallengeMethod: String) throws -> (AuthCodes, String) {
         let code = [UInt8].random(count: 64).base64.replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
         guard let expiresDate = Calendar.current.date(byAdding: .minute, value: 3, to: Date()) else {
             throw Abort(.internalServerError, reason: "Couldn't get expires date.")
         }
-        let authCodes = AuthCodes(expired: expiresDate, code: code, redirectURI: redirectURI, clientID: clientID, userID: userID)
+        let authCodes = AuthCodes(expired: expiresDate, code: code, redirectURI: redirectURI,codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod, clientID: clientID, userID: userID)
         return (authCodes, code)
     }
     
@@ -129,6 +149,8 @@ struct AuthorizationRequest: Content {
     var response_type: String
     var client_id: String
     var redirect_uri: String?
+    var code_challenge: String?
+    var code_challenge_method: String?
     var scope: String?
     var state: String?
 }

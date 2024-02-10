@@ -44,6 +44,8 @@ public struct CreateOAuthAuthorizationCodes: AsyncMigration {
             .field("used", .bool)
             .field("code", .string, .required)
             .field("redirect_uri", .string)
+            .field("code_challenge", .string)
+            .field("code_challenge_method", .string)
             .field("client_id", .uuid, .required, .references("oauth_clients", "id"))
             .field("user_id", .uuid, .required, .references(self.userTableName, userTableIdFiled))
             .field("access_token_id", .uuid, .references(self.accessTokenTableName, "id", onDelete: .cascade))

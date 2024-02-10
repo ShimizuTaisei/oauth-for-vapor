@@ -27,6 +27,8 @@ public protocol AuthorizationCode: Model {
     var isUsed: Bool { get set }
     var code: String { get set }
     var redirectURI: String { get set }
+    var codeChallenge: String { get set }
+    var codeChallengeMethod: String { get set }
     var client: OAuthClients { get set }
     var user: User { get set }
     var accessToken: AccessTokenType? { get set }
@@ -40,7 +42,8 @@ public protocol AuthorizationCode: Model {
     ///   - redirectURI: The redirect uri which registerd to clients table.
     ///   - clientID: The ID of client which is related to this record.
     ///   - userID: The ID of user which is related to this table.
-    init(expired: Date, code: String, redirectURI: String, clientID: UUID, userID: User.IDValue)
+    init(expired: Date, code: String, redirectURI: String, codeChallenge: String, codeChallengeMethod: String,
+         clientID: UUID, userID: User.IDValue)
     
     /// Set list of scopes to this record.
     /// - Parameters:

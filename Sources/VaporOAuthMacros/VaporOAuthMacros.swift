@@ -148,6 +148,14 @@ public struct AuthorizationCodeModelMacro: MemberMacro {
             public var redirectURI: String
             """,
             """
+            @Field(key: "code_challenge")
+            public var codeChallenge: String
+            """,
+            """
+            @Field(key: "code_challenge_method")
+            public var codeChallengeMethod: String
+            """,
+            """
             @Parent(key: "client_id")
             public var client: OAuthClients
             """,
@@ -168,12 +176,14 @@ public struct AuthorizationCodeModelMacro: MemberMacro {
             public var scopes: [OAuthScopes]
             """,
             """
-            public init(expired: Date, code: String, redirectURI: String, clientID: OAuthClients.IDValue, userID: User.IDValue) {
+            public init(expired: Date, code: String, redirectURI: String, codeChallenge: String, codeChallengeMethod: String, clientID: UUID, userID: UUID) {
                 self.expired = expired
                 self.isRevoked = false
                 self.isUsed = false
                 self.code = SHA512.hash(data: Data(code.utf8)).hexEncodedString()
                 self.redirectURI = redirectURI
+                self.codeChallenge = codeChallenge
+                self.codeChallengeMethod = codeChallengeMethod
                 self.$client.id = clientID
                 self.$user.id = userID
             }

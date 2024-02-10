@@ -30,6 +30,25 @@ public class AccessTokenUtility {
             return try accessTokenError(req: req, statusCode: .unauthorized, error: .invalidGrant, description: "Missing or invalid code.")
         }
         
+        // Check code_challenge
+        if let codeVerifier = requestParams.code_verifier, let codeVerifierData = codeVerifier.data(using: .ascii) {
+            let codeChallenge: String
+            switch authCode.codeChallengeMethod {
+            case "plain":
+                codeChallenge = codeVerifier
+            case "S256":
+                codeChallenge = Data(SHA256.hash(data: codeVerifierData)).base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
+            default:
+                throw Abort(.internalServerError)
+            }
+            
+            guard codeChallenge == authCode.codeChallenge else {
+                return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidGrant, description: "Invalid code_verifier")
+            }
+        } else {
+            return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidRequest, description: "Request must contain code_verifier")
+        }
+        
         if authCode.isUsed {
             // Revoke access tokens which issued based on the auth code
             try await authCode.loadTokens(on: req.db)
@@ -179,6 +198,7 @@ struct AccessTokenFromAuthorizationCodeRequest: Content {
     var grant_type: String
     var code: String
     var redirect_uri: String
+    var code_verifier: String?
     var client_id: String
 }
 

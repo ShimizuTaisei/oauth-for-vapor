@@ -35,7 +35,7 @@ public struct OAuthClientsController: RouteCollection {
         
         var clientSecret: String?
         if create.isConfidentialClient {
-            clientSecret = [UInt8].random(count: 32).base64
+            clientSecret = [UInt8].random(count: 64).base64
         }
         
         let client = try OAuthClients(name: create.name, clientSecret: clientSecret, redirectURIs: create.redirectUri, grantTypes: create.grantTypes, isConfidentialClient: create.isConfidentialClient)

@@ -64,3 +64,5 @@ extension OAuthClients {
         }
     }
 }
+
+extension OAuthClients: Authenticatable {}

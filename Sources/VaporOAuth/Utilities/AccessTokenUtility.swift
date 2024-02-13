@@ -25,6 +25,16 @@ public class AccessTokenUtility {
     <AuthCodes: AuthorizationCode, AccessTokens: AccessToken, RefreshTokens: RefreshToken>
     (req: Request, authCode: AuthCodes.Type, accessToken: AccessTokens.Type, refreshToken: RefreshTokens.Type) async throws -> Response {
         let requestParams = try req.content.decode(AccessTokenFromAuthorizationCodeRequest.self)
+        
+        // Authenticate client if client type is confidential.
+        let clientID = UUID(uuidString: requestParams.client_id)
+        guard let client = try await OAuthClients.find(clientID, on: req.db) else {
+            return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidRequest, description: "Invalid client_id")
+        }
+        if client.isConfidentialClient {
+            try req.auth.require(OAuthClients.self)
+        }
+        
         let hashedCode = SHA512.hash(data: Data(requestParams.code.utf8)).hexEncodedString()
         guard let authCode = try await AuthCodes.queryByAuthCode(on: req.db, code: hashedCode) else {
             return try accessTokenError(req: req, statusCode: .unauthorized, error: .invalidGrant, description: "Missing or invalid code.")

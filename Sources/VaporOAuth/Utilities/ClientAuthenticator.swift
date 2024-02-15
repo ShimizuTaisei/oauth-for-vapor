@@ -9,8 +9,10 @@
 import Foundation
 import Vapor
 
-struct ClientAuthenticator: AsyncBasicAuthenticator {
-    func authenticate(basic: BasicAuthorization, for request: Request) async throws {
+public struct ClientAuthenticator: AsyncBasicAuthenticator {
+    public init() {}
+    
+    public func authenticate(basic: BasicAuthorization, for request: Request) async throws {
         let clientID = UUID(uuidString: basic.username)
         guard let client = try await OAuthClients.find(clientID, on: request.db), let secret = client.clientSecret else { return }
         if try Bcrypt.verify(basic.password, created: secret) {

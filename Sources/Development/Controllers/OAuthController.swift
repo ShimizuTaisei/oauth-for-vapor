@@ -16,11 +16,12 @@ struct OAuthController: RouteCollection {
         let oauth = routes.grouped("oauth")
         let sessionAuth = oauth.grouped(Users.sessionAuthenticator())
         let credentialAuth = oauth.grouped(Users.credentialsAuthenticator())
+        let clientAuth = oauth.grouped(ClientAuthenticator())
         
         sessionAuth.get(use: getAuthTop(req:))
         sessionAuth.get("login", use: getLoginForm(req:))
         credentialAuth.post("login", use: postLoginForm(req:))
-        oauth.post("token", use: postTokenEndpoint(req:))
+        clientAuth.post("token", use: postTokenEndpoint(req:))
     }
     
     // MARK: - GET /oauth/

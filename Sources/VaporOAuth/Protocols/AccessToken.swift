@@ -38,4 +38,9 @@ public protocol AccessToken: Model where IDValue == UUID {
     ///   - scopes: The list of scopes which should be attached to the token.
     ///   - database: The database.
     func setScope(_ scopes: [OAuthScopes], on database: Database) async throws
+    
+    /// Get list of access token for database cleanup.
+    /// - Parameter database: The database object.
+    /// - Returns: The list of access token which is expected to delete.
+    static func forDelete(on database: Database) async throws -> [Self]
 }

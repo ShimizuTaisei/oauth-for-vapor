@@ -62,5 +62,17 @@ public protocol AuthorizationCode: Model {
     /// Eager load access-token and refresh-token which is related to this record.
     /// - Parameter database: The database object.
     func loadTokens(on database: Database) async throws
+    
+    
+    /// Relate access token and refresh token to this authcode.
+    /// - Parameters:
+    ///   - accessTokenID: The ID of access token which will be related to this authcode.
+    ///   - refreshTokenID: The ID of refresh token which will be related to this authcode.
     func setTokens(accessTokenID: UUID, refreshTokenID: UUID)
+    
+    
+    /// Get list of authcodes for database cleanup.
+    /// - Parameter database: The database object
+    /// - Returns: The list of authorization code which is expected to delete.
+    static func forDelete(on database: Database) async throws -> [Self]
 }

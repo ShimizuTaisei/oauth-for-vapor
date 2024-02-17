@@ -22,6 +22,8 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.2"),
         
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
+        .package(url: "https://github.com/vapor/redis.git", from: "4.10.0"),
+        .package(url: "https://github.com/vapor/queues-redis-driver.git", from: "1.1.1"),
     ],
     targets: [
         .macro(
@@ -32,6 +34,8 @@ let package = Package(
                 .product(name: "Fluent", package: "fluent"),
                 .product(name: "FluentMySQLDriver", package: "fluent-mysql-driver"),
                 .product(name: "Vapor", package: "vapor"),
+                .product(name: "Redis", package: "redis"),
+                .product(name: "QueuesRedisDriver", package: "queues-redis-driver")
             ]),
         .target(
             name: "VaporOAuth",
@@ -41,6 +45,8 @@ let package = Package(
                 .product(name: "FluentMySQLDriver", package: "fluent-mysql-driver"),
                 .product(name: "Leaf", package: "leaf"),
                 .product(name: "Vapor", package: "vapor"),
+                .product(name: "Redis", package: "redis"),
+                .product(name: "QueuesRedisDriver", package: "queues-redis-driver")
             ]
         ),
         .executableTarget(

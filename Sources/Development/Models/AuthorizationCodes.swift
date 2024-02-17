@@ -18,4 +18,11 @@ public final class AuthorizationCodes: AuthorizationCode {
     public typealias User = Users
     public typealias AccessTokenType = AccessTokens
     public typealias RefreshTokenType = RefreshTokens
+    
+    public static func forDelete(on database: Database) async throws -> [AuthorizationCodes] {
+        let revokedAuthCodes = try await AuthorizationCodes.query(on: database).group(.or) { group in
+            group.filter(\.$isRevoked == true).filter(\.$expired < Date())
+        }.withDeleted().all()
+        return revokedAuthCodes
+    }
 }

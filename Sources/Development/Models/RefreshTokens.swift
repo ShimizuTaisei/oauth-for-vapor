@@ -17,5 +17,12 @@ public final class RefreshTokens: RefreshToken {
     
     public typealias User = Users
     public typealias AccessTokenType = AccessTokens
+    
+    public static func forDelete(on database: Database) async throws -> [RefreshTokens] {
+        let revokedRefreshTokens = try await RefreshTokens.query(on: database).group(.or) { group in
+            group.filter(\.$isRevoked == true).filter(\.$expired < Date())
+        }.withDeleted().all()
+        return revokedRefreshTokens
+    }
 }
 

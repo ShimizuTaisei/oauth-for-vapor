@@ -50,4 +50,9 @@ public protocol RefreshToken: Model where IDValue == UUID {
     ///   - database: The database objects.
     /// - Returns: The query result that is instance of class which conforms to ``RefreshToken``.
     static func queryRefreshToken(_ refreshToken: String, on database: Database) async throws -> Self?
+    
+    /// Get list of refresh token for database cleanup.
+    /// - Parameter database: The database object.
+    /// - Returns: The list of instance of token which is expected to delete.
+    static func forDelete(on database: Database) async throws -> [Self]
 }

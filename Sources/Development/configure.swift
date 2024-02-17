@@ -46,6 +46,14 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateOAuthAccessTokenScopes())
     app.migrations.add(CreateOAuthRefreshTokenScopes())
     app.migrations.add(CreateOAuthAuthorizationCodeScopes())
+    
+//    app.queues.schedule(OAuthCleanDatabase<AuthorizationCodes, AccessTokens, RefreshTokens>())
+//        .daily()
+//        .at(2, 0)
+    
+    app.queues.schedule(OAuthCleanDatabase<AuthorizationCodes, AccessTokens, RefreshTokens>())
+        .minutely()
+        .at(0)
 
     // register routes
     try routes(app)

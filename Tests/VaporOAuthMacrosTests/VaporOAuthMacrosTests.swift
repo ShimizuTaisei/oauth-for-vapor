@@ -14,6 +14,7 @@ import SwiftSyntaxMacrosTestSupport
 import XCTVapor
 
 final class VaporOAuthMacrosTests: XCTestCase {
+    // MARK: - AccessTokens
     func testAccessToken() throws {
         assertMacroExpansion("""
         @AccessTokenModel
@@ -70,11 +71,22 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public func setScope(_ scopes: [OAuthScopes], on database: Database) async throws {
                 try await self.$scopes.attach(scopes, on: database)
             }
+        
+            /// Return revoked tokens to delete.
+            /// - Parameter database: Database.
+            /// - Returns: The list of revoked or expired tokens.
+            public static func forDelete(on database: Database) async throws -> [AccessTokens] {
+                let revokedAccessTokens = try await AccessTokens.query(on: database).group(.or) { group in
+                    group.filter(\\.$isRevoked == true).filter(\\.$expired < Date())
+                } .withDeleted().all()
+                return revokedAccessTokens
+            }
         }
         """
         , macros: ["AccessTokenModel": AccessTokenModelMacro.self])
     }
     
+    // MARK: - AccessTokenScopes
     func testAccesTokenScope() throws {
         assertMacroExpansion("""
         @AccessTokenScopeModel
@@ -109,6 +121,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
         macros: ["AccessTokenScopeModel": AccesstokenScopeModelMacro.self])
     }
     
+    // MARK: - AuthorizationCodes
     func testAuthorizationCode() throws {
         assertMacroExpansion("""
         @AuthorizationCodeModel
@@ -206,10 +219,21 @@ final class VaporOAuthMacrosTests: XCTestCase {
                 self.$accessToken.id = accessTokenID
                 self.$refreshToken.id = refreshTokenID
             }
+        
+            /// Return revoked codes to delete.
+            /// - Parameter database: Database.
+            /// - Returns: The list of revoked or expired codes.
+            public static func forDelete(on database: Database) async throws -> [AuthorizationCodes] {
+                let revokedAuthCodes = try await AuthorizationCodes.query(on: database).group(.or) { group in
+                    group.filter(\\.$isRevoked == true).filter(\\.$expired < Date())
+                } .withDeleted().all()
+                return revokedAuthCodes
+            }
         }
         """, macros: ["AuthorizationCodeModel": AuthorizationCodeModelMacro.self])
     }
     
+    // MARK: - AuthorizationCodeScopes
     func testAuthorizationCodeScope() throws {
         assertMacroExpansion("""
         @AuthorizationCodeScopeModel
@@ -243,6 +267,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
         """,macros: ["AuthorizationCodeScopeModel": AuthorizationCodeScopeModelMacro.self])
     }
     
+    // MARK: - RefreshTokens
     func testRefreshToken() throws {
         assertMacroExpansion("""
         @RefreshTokenModel
@@ -310,10 +335,21 @@ final class VaporOAuthMacrosTests: XCTestCase {
                 let refreshToken = try await RefreshTokens.query(on: database).filter(\\.$refreshToken == refreshToken).with(\\.$accessToken).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
                 return refreshToken
             }
+        
+            /// Return revoked tokens to delete.
+            /// - Parameter database: Database.
+            /// - Returns: The list of revoked or expired tokens.
+            public static func forDelete(on database: Database) async throws -> [RefreshTokens] {
+                let revokedRefreshTokens = try await RefreshTokens.query(on: database).group(.or) { group in
+                    group.filter(\\.$isRevoked == true).filter(\\.$expired < Date())
+                } .withDeleted().all()
+                return revokedRefreshTokens
+            }
         }
         """,macros: ["RefreshTokenModel": RefreshTokenModelMacro.self])
     }
     
+    // MARK: RefreshTokenScopes
     func testRefreshTokenScope() throws {
         assertMacroExpansion("""
         @RefreshTokenScopeModel

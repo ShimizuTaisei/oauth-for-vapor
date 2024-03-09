@@ -17,13 +17,6 @@ public final class AccessTokens: AccessToken {
     public static var schema: String = "oauth_access_tokens"
     public typealias User = Users
     public typealias AccessTokenScopeType = AccessTokenScopes
-    
-    public static func forDelete(on database: Database) async throws -> [AccessTokens] {
-        let revokedAccessTokens = try await AccessTokens.query(on: database).group(.or) { group in
-            group.filter(\.$isRevoked == true).filter(\.$expired < Date())
-        }.withDeleted().all()
-        return revokedAccessTokens
-    }
 }
 
 @AccessTokenAuthenticator

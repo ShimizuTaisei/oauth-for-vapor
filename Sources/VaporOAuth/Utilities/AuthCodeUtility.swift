@@ -21,12 +21,14 @@ public class AuthCodeUtility {
     /// - Returns: Redirect response.
     public func validateAuthRequest(req: Request, redirectURI: String) async throws -> Response {
         let queryParams = try req.query.decode(AuthorizationRequest.self)
+        
+        // Search client on database by given client_id.
         guard let clientUUID = UUID(uuidString: queryParams.client_id) else {
             return try authCodeError(req: req, redirectURI: nil, isInvalidRedirectURI: true, state: queryParams.state, error: .invalidRequest, description: "Invalid client_id")
         }
         let client = try await OAuthClients.find(clientUUID, on: req.db)
         
-        // Check whether redirect_uri is correct.
+        // Check whether redirect_uri is correct(Check whether given client_id is stored on client's record.).
         guard let _ = client?.redirectURIs.first(where: { $0 == queryParams.redirect_uri }) else {
             return try authCodeError(req: req, redirectURI: nil, isInvalidRedirectURI: true, state: queryParams.state, error: .invalidRequest, description: "Invalid redirect_uri.")
         }
@@ -36,23 +38,26 @@ public class AuthCodeUtility {
             return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .unsupportedResponseType, description: "The \"response_type\" must be set to \"code\".")
         }
         
+        // Search database by given scopes parameter and make array of ``OAuthScopes``.
         let scopeStrings = queryParams.scope?.components(separatedBy: " ") ?? []
         guard let scopes = try? await OAuthScopes.query(on: req.db).filter(\.$name ~~ scopeStrings).all() else {
             return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidScope, description: "Not found scope (DB query failed).")
         }
         
+        // If array of ``OAuthScopes`` have no element, the error will be returned.
         guard scopes.count > 0 else {
             return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidScope, description: "Not found scope (scope count is 0).")
         }
         
+        // The parameter code_challenge and code_challenge_method are requred.
         guard let codeChallenge = queryParams.code_challenge else {
             return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidRequest, description: "Request must contain \"code_challenge\"")
         }
-        
         guard let codeChallengeMethod = queryParams.code_challenge_method else {
             return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidRequest, description: "Request must contain \"code_challenge_method\"")
         }
         
+        // Store given parameters to session.
         req.session.data["response_type"] = queryParams.response_type
         req.session.data["client_id"] = queryParams.client_id
         req.session.data["redirect_uri"] = queryParams.redirect_uri
@@ -61,6 +66,7 @@ public class AuthCodeUtility {
         req.session.data["scope"] = queryParams.scope
         req.session.data["state"] = queryParams.state
         
+        // Then, redirect user to the uri, typically login form.
         return req.redirect(to: redirectURI, redirectType: .normal)
     }
     
@@ -68,6 +74,7 @@ public class AuthCodeUtility {
     /// - Parameter req: Request object from route function.
     /// - Returns: The resonse which redirect user to given redirect-uri.
     public func issueAuthCode<AuthCodes: AuthorizationCode>(req: Request, type: AuthCodes.Type) async throws -> Response {
+        // Get stored request parameters from session.
         let state = req.session.data["state"]
         guard let codeChallenge = req.session.data["code_challenge"] else {
             throw Abort(.badRequest, reason: "Not found \"code_challenge\" in request")
@@ -75,11 +82,9 @@ public class AuthCodeUtility {
         guard let codeChallengeMethod = req.session.data["code_challenge_method"] else {
             throw Abort(.badRequest, reason: "Not found \"code_challenge\" in request")
         }
-        
         guard let redirectURI = req.session.data["redirect_uri"] else {
             return try authCodeError(req: req, redirectURI: nil, isInvalidRedirectURI: true, state: state, error: .invalidRequest, description: "Invalid redirect_uri")
         }
-        
         guard let clientID = req.session.data["client_id"] else {
             return try authCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidRequest, description: "Invalid client_id")
         }
@@ -88,8 +93,11 @@ public class AuthCodeUtility {
             return try authCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidRequest, description: "Invalid client_id")
         }
         
+        // Check whether user is logged in and get user's information.
         let user = try req.auth.require(AuthCodes.User.self)
         
+        // Make array of ``OAuthScopes`` by searching database with given request parameter, scopes,
+        // and check the array is not empty.
         let scopeStrings = req.session.data["scope"]?.components(separatedBy: " ") ?? []
         guard let scopes = try? await OAuthScopes.query(on: req.db).filter(\.$name ~~ scopeStrings).all() else {
             return try authCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidScope, description: "Not found scope")
@@ -98,10 +106,12 @@ public class AuthCodeUtility {
             return try authCodeError(req: req, redirectURI: redirectURI, isInvalidRedirectURI: false, state: state, error: .invalidScope, description: "Not found scope")
         }
         
+        // Generate authorization code and save it.
         let (oauthAuthorizationCode, authCode): (AuthCodes, String) = try generateAuthorizationCode(userID: user.requireID(), clientID: client.requireID(), redirectURI: redirectURI, codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
         try await oauthAuthorizationCode.save(on: req.db)
         try await oauthAuthorizationCode.setScopes(scopes, on: req.db)
         
+        // Redirect user with query parameters which contain authorization code and state.
         let authCodeResponse = AuthCodeResponse(code: authCode, state: state)
         let queryParams = try URLEncodedFormEncoder().encode(authCodeResponse)
         let httpResponse = req.redirect(to: "\(redirectURI)?\(queryParams)")

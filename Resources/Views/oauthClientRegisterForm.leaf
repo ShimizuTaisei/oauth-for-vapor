@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>教員追加</title>
+    </head>
+
+    <body>
+        <form method="POST" action="/oauth/clients/new/">
+            <label for="name">Name</label>
+            <input type="text" id="name" placeholder="Name" name="name" required>
+
+            <label for="redirect_uri">Redirect URI</label>
+            <input type="text" id="redirect_uri" placeholder="Redirect URI" name="redirectUri" required>
+
+            <label for="grant_types">Grant Types</label>
+            <select name="grantTypes" id="grant_types">
+                <option value="authorization_code">authorization_code</option>
+            </select>
+
+            <label for="confidential_client">Confidential Client</label>
+            <input type="checkbox" id="confidential_client" name="isConfidentialClient">
+            <input type="submit" value="Add">
+        </form>
+    </body>
+</html>

@@ -238,6 +238,12 @@ public struct AuthorizationCodeModelMacro: MemberMacro {
                 return revokedAuthCodes
             }
             """,
+            """
+            public static func findByID(id: UUID, on database: Database) async throws -> AuthorizationCodes? {
+                let authCode = try await AuthorizationCodes.query(on: database).filter(\\.$id == id).with(\\.$user).with(\\.$scopes).first()
+                return authCode
+            }
+            """,
         ]
     }
 }

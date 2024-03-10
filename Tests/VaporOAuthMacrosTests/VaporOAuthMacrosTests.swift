@@ -185,11 +185,11 @@ final class VaporOAuthMacrosTests: XCTestCase {
             @Siblings(through: AuthorizationCodeScopes.self, from: \\.$authorizationCode, to: \\.$scope)
             public var scopes: [OAuthScopes]
 
-            public init(expired: Date, code: String, redirectURI: String, codeChallenge: String, codeChallengeMethod: String, clientID: UUID, userID: UUID) {
+            public init(expired: Date, code: String, redirectURI: String, codeChallenge: String, codeChallengeMethod: String, clientID: UUID, userID: UUID) throws {
                 self.expired = expired
                 self.isRevoked = false
                 self.isUsed = false
-                self.code = SHA512.hash(data: Data(code.utf8)).hexEncodedString()
+                self.code = try Bcrypt.hash(code)
                 self.redirectURI = redirectURI
                 self.codeChallenge = codeChallenge
                 self.codeChallengeMethod = codeChallengeMethod
@@ -228,6 +228,11 @@ final class VaporOAuthMacrosTests: XCTestCase {
                     group.filter(\\.$isRevoked == true).filter(\\.$expired < Date())
                 } .withDeleted().all()
                 return revokedAuthCodes
+            }
+        
+            public static func findByID(id: UUID, on database: Database) async throws -> AuthorizationCodes? {
+                let authCode = try await AuthorizationCodes.query(on: database).filter(\\.$id == id).with(\\.$user).with(\\.$scopes).first()
+                return authCode
             }
         }
         """, macros: ["AuthorizationCodeModel": AuthorizationCodeModelMacro.self])

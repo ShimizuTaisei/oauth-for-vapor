@@ -75,4 +75,11 @@ public protocol AuthorizationCode: Model where IDValue == UUID {
     /// - Parameter database: The database object
     /// - Returns: The list of authorization code which is expected to delete.
     static func forDelete(on database: Database) async throws -> [Self]
+    
+    /// Find instance of class which conforms to ``AuthorizationCode`` by given id with eager loading.
+    /// - Parameters:
+    ///   - id: The id for query.
+    ///   - database: Database.
+    /// - Returns: The query result that is instance of class which conforms to ``AuthorizationCode``.
+    static func findByID(id: UUID, on database: Database) async throws -> Self?
 }

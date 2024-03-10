@@ -35,9 +35,22 @@ public class AccessTokenUtility {
             try req.auth.require(OAuthClients.self)
         }
         
-        let hashedCode = SHA512.hash(data: Data(requestParams.code.utf8)).hexEncodedString()
-        guard let authCode = try await AuthCodes.queryByAuthCode(on: req.db, code: hashedCode) else {
-            return try accessTokenError(req: req, statusCode: .unauthorized, error: .invalidGrant, description: "Missing or invalid code.")
+        // Extract auth code ID and code's body.
+        guard let codeData = requestParams.code.base64URLDecoded(),
+              let codeWithID = String(data: codeData, encoding: .utf8) else {
+            throw Abort(.badRequest)
+        }
+        let codeAndID = codeWithID.components(separatedBy: ":")
+        guard let id = UUID(uuidString: codeAndID[0]) else { throw Abort(.badRequest) }
+        let code = codeAndID[1]
+        
+        // Find auth code on database by id.
+        guard let authCode = try await AuthCodes.findByID(id: id, on: req.db) else {
+            return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidGrant, description: "Missing or invalid code.")
+        }
+        
+        guard try Bcrypt.verify(code, created: authCode.code) else {
+            return try accessTokenError(req: req, statusCode: .unauthorized, error: .invalidGrant, description: "Invalid code.")
         }
         
         // Check code_challenge

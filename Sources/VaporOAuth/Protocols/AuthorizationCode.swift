@@ -11,7 +11,7 @@ import Fluent
 import Vapor
 
 /// A protocol that defines menbers for table which stores authorization codes.
-public protocol AuthorizationCode: Model {
+public protocol AuthorizationCode: Model where IDValue == UUID {
     /// The type of user table.
     associatedtype User: Model, Authenticatable
     
@@ -43,7 +43,7 @@ public protocol AuthorizationCode: Model {
     ///   - clientID: The ID of client which is related to this record.
     ///   - userID: The ID of user which is related to this table.
     init(expired: Date, code: String, redirectURI: String, codeChallenge: String, codeChallengeMethod: String,
-         clientID: UUID, userID: User.IDValue)
+         clientID: UUID, userID: User.IDValue) throws
     
     /// Set list of scopes to this record.
     /// - Parameters:

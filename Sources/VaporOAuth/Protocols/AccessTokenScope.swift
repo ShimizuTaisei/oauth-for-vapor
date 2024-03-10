@@ -10,7 +10,7 @@ import Foundation
 import Fluent
 
 /// A protocol that defines menbers for table which associates access-token and scopes.
-public protocol AccessTokenScope: Model {
+public protocol AccessTokenScope: Model where IDValue == UUID {
     /// The type of access token table. It should conform to ``AccessToken``.
     associatedtype AccessTokenType: AccessToken
     

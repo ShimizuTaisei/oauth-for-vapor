@@ -10,7 +10,7 @@ import Foundation
 import Fluent
 
 /// A protocol that defines members for table which associates refresh-token and scopes.
-public protocol RefreshTokenScope: Model {
+public protocol RefreshTokenScope: Model where IDValue == UUID {
     /// The type of refresh token. It should conform to ``RefreshToken``
     associatedtype RefreshTokenType: RefreshToken
     

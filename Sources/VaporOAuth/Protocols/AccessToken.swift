@@ -31,7 +31,7 @@ public protocol AccessToken: Model where IDValue == UUID {
     ///   - accessToken: The body of access token.
     ///   - userID: The ID of user who was related to this token.
     ///   - clientID: The ID of client which was related to this token.
-    init(expired: Date, accessToken: String, userID: User.IDValue, clientID: UUID)
+    init(expired: Date, accessToken: String, userID: User.IDValue, clientID: UUID) throws
     
     /// Set list of scopes to the access token.
     /// - Parameters:

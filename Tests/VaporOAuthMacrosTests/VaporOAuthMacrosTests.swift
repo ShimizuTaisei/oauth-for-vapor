@@ -56,10 +56,10 @@ final class VaporOAuthMacrosTests: XCTestCase {
             @Siblings(through: AccessTokenScopeType.self, from: \\.$accessToken, to: \\.$scope)
             public var scopes: [OAuthScopes]
 
-            public init(expired: Date, accessToken: String, userID: User.IDValue, clientID: OAuthClients.IDValue) {
+            public init(expired: Date, accessToken: String, userID: User.IDValue, clientID: OAuthClients.IDValue) throws {
                 self.expired = expired
                 self.isRevoked = false
-                self.accessToken = SHA512.hash(data: Data(accessToken.utf8)).hexEncodedString()
+                self.accessToken = try Bcrypt.hash(accessToken)
                 self.$user.id = userID
                 self.$client.id = clientID
             }
@@ -324,10 +324,10 @@ final class VaporOAuthMacrosTests: XCTestCase {
             @Siblings(through: RefreshTokenScopes.self, from: \\.$refreshToken, to: \\.$scope)
             public var scopes: [OAuthScopes]
 
-            public init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID) {
+            public init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID) throws {
                 self.expired = expired
                 self.isRevoked = false
-                self.refreshToken = SHA512.hash(data: Data(refreshToken.utf8)).hexEncodedString()
+                self.refreshToken = try Bcrypt.hash(refreshToken)
                 self.$accessToken.id = accessTokenID
                 self.$user.id = userID
                 self.$client.id = clientID

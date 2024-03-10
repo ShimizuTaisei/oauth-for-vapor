@@ -12,3 +12,5 @@ import Vapor
 public protocol TokenAuthenticator: AsyncBearerAuthenticator {
     associatedtype AccessTokenType: AccessToken
 }
+
+

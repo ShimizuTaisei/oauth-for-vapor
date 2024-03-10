@@ -187,11 +187,11 @@ public struct AuthorizationCodeModelMacro: MemberMacro {
             public var scopes: [OAuthScopes]
             """,
             """
-            public init(expired: Date, code: String, redirectURI: String, codeChallenge: String, codeChallengeMethod: String, clientID: UUID, userID: UUID) {
+            public init(expired: Date, code: String, redirectURI: String, codeChallenge: String, codeChallengeMethod: String, clientID: UUID, userID: UUID) throws {
                 self.expired = expired
                 self.isRevoked = false
                 self.isUsed = false
-                self.code = SHA512.hash(data: Data(code.utf8)).hexEncodedString()
+                self.code = try Bcrypt.hash(code)
                 self.redirectURI = redirectURI
                 self.codeChallenge = codeChallenge
                 self.codeChallengeMethod = codeChallengeMethod

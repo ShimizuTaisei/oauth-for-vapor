@@ -81,6 +81,11 @@ final class VaporOAuthMacrosTests: XCTestCase {
                 } .withDeleted().all()
                 return revokedAccessTokens
             }
+
+            public static func findByID(id: UUID, on database: Database) async throws -> AccessTokens? {
+                let accessToken = try await AccessTokens.query(on: database).filter(\\.$id == id).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
+                return accessToken
+            }
         }
         """
         , macros: ["AccessTokenModel": AccessTokenModelMacro.self])
@@ -349,6 +354,11 @@ final class VaporOAuthMacrosTests: XCTestCase {
                     group.filter(\\.$isRevoked == true).filter(\\.$expired < Date())
                 } .withDeleted().all()
                 return revokedRefreshTokens
+            }
+        
+            public static func findByID(id: UUID, on database: Database) async throws -> RefreshTokens? {
+                let refreshToken = try await RefreshTokens.query(on: database).filter(\\.$id == id).with(\\.$accessToken).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
+                return refreshToken
             }
         }
         """,macros: ["RefreshTokenModel": RefreshTokenModelMacro.self])

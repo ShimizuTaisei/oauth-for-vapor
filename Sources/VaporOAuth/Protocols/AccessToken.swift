@@ -43,4 +43,11 @@ public protocol AccessToken: Model where IDValue == UUID {
     /// - Parameter database: The database object.
     /// - Returns: The list of access token which is expected to delete.
     static func forDelete(on database: Database) async throws -> [Self]
+    
+    /// Find instance of class which conforms to ``AccessToken`` by given id with eager loading.
+    /// - Parameters:
+    ///   - id: The ID of token to search database.
+    ///   - database: Database.
+    /// - Returns: The query result.
+    static func findByID(id: UUID, on database: Database) async throws -> Self?
 }

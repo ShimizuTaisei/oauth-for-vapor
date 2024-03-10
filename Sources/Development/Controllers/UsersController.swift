@@ -9,13 +9,14 @@
 import Foundation
 import Vapor
 import Fluent
+import VaporOAuth
 
 struct UsersController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let users = routes.grouped("users")
         let sessionAuth = users.grouped(Users.sessionAuthenticator())
         let credentialAuth = sessionAuth.grouped(Users.credentialsAuthenticator())
-        let tokenAuth = users.grouped(UserAuthenticator())
+        let tokenAuth = users.grouped(OAuthAuthenticator<AccessTokens>())
         
         tokenAuth.get(use: getTop(req:))
 //        sessionAuth.get(use: getTop(req:))

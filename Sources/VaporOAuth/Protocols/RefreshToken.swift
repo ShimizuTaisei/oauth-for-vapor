@@ -34,7 +34,7 @@ public protocol RefreshToken: Model where IDValue == UUID {
     ///   - accessTokenID: The ID of access token which refered from this record. Mostly the access token is created in same time with refresh token.
     ///   - userID: The ID of user who was related to this record.
     ///   - clientID: The ID of client which was related to this record.
-    init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID)
+    init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID) throws
     
     
     /// Set list of scopes to this record.

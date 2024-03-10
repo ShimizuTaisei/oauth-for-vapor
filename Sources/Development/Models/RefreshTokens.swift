@@ -8,6 +8,7 @@
 
 import Foundation
 import Fluent
+import Vapor
 import VaporOAuth
 import Crypto
 

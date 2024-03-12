@@ -56,10 +56,10 @@ final class VaporOAuthMacrosTests: XCTestCase {
             @Siblings(through: AccessTokenScopeType.self, from: \\.$accessToken, to: \\.$scope)
             public var scopes: [OAuthScopes]
 
-            public init(expired: Date, accessToken: String, userID: User.IDValue, clientID: OAuthClients.IDValue) {
+            public init(expired: Date, accessToken: String, userID: User.IDValue, clientID: OAuthClients.IDValue) throws {
                 self.expired = expired
                 self.isRevoked = false
-                self.accessToken = SHA512.hash(data: Data(accessToken.utf8)).hexEncodedString()
+                self.accessToken = try Bcrypt.hash(accessToken)
                 self.$user.id = userID
                 self.$client.id = clientID
             }
@@ -80,6 +80,11 @@ final class VaporOAuthMacrosTests: XCTestCase {
                     group.filter(\\.$isRevoked == true).filter(\\.$expired < Date())
                 } .withDeleted().all()
                 return revokedAccessTokens
+            }
+
+            public static func findByID(id: UUID, on database: Database) async throws -> AccessTokens? {
+                let accessToken = try await AccessTokens.query(on: database).filter(\\.$id == id).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
+                return accessToken
             }
         }
         """
@@ -185,11 +190,11 @@ final class VaporOAuthMacrosTests: XCTestCase {
             @Siblings(through: AuthorizationCodeScopes.self, from: \\.$authorizationCode, to: \\.$scope)
             public var scopes: [OAuthScopes]
 
-            public init(expired: Date, code: String, redirectURI: String, codeChallenge: String, codeChallengeMethod: String, clientID: UUID, userID: UUID) {
+            public init(expired: Date, code: String, redirectURI: String, codeChallenge: String, codeChallengeMethod: String, clientID: UUID, userID: UUID) throws {
                 self.expired = expired
                 self.isRevoked = false
                 self.isUsed = false
-                self.code = SHA512.hash(data: Data(code.utf8)).hexEncodedString()
+                self.code = try Bcrypt.hash(code)
                 self.redirectURI = redirectURI
                 self.codeChallenge = codeChallenge
                 self.codeChallengeMethod = codeChallengeMethod
@@ -228,6 +233,11 @@ final class VaporOAuthMacrosTests: XCTestCase {
                     group.filter(\\.$isRevoked == true).filter(\\.$expired < Date())
                 } .withDeleted().all()
                 return revokedAuthCodes
+            }
+        
+            public static func findByID(id: UUID, on database: Database) async throws -> AuthorizationCodes? {
+                let authCode = try await AuthorizationCodes.query(on: database).filter(\\.$id == id).with(\\.$user).with(\\.$scopes).first()
+                return authCode
             }
         }
         """, macros: ["AuthorizationCodeModel": AuthorizationCodeModelMacro.self])
@@ -314,10 +324,10 @@ final class VaporOAuthMacrosTests: XCTestCase {
             @Siblings(through: RefreshTokenScopes.self, from: \\.$refreshToken, to: \\.$scope)
             public var scopes: [OAuthScopes]
 
-            public init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID) {
+            public init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID) throws {
                 self.expired = expired
                 self.isRevoked = false
-                self.refreshToken = SHA512.hash(data: Data(refreshToken.utf8)).hexEncodedString()
+                self.refreshToken = try Bcrypt.hash(refreshToken)
                 self.$accessToken.id = accessTokenID
                 self.$user.id = userID
                 self.$client.id = clientID
@@ -344,6 +354,11 @@ final class VaporOAuthMacrosTests: XCTestCase {
                     group.filter(\\.$isRevoked == true).filter(\\.$expired < Date())
                 } .withDeleted().all()
                 return revokedRefreshTokens
+            }
+        
+            public static func findByID(id: UUID, on database: Database) async throws -> RefreshTokens? {
+                let refreshToken = try await RefreshTokens.query(on: database).filter(\\.$id == id).with(\\.$accessToken).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
+                return refreshToken
             }
         }
         """,macros: ["RefreshTokenModel": RefreshTokenModelMacro.self])

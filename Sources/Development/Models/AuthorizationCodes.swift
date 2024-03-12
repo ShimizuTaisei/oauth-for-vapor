@@ -8,8 +8,8 @@
 
 import Foundation
 import Fluent
+import Vapor
 import VaporOAuth
-import Crypto
 
 @AuthorizationCodeModel
 public final class AuthorizationCodes: AuthorizationCode {

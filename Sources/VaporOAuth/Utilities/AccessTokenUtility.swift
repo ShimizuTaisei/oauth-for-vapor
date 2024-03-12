@@ -35,9 +35,22 @@ public class AccessTokenUtility {
             try req.auth.require(OAuthClients.self)
         }
         
-        let hashedCode = SHA512.hash(data: Data(requestParams.code.utf8)).hexEncodedString()
-        guard let authCode = try await AuthCodes.queryByAuthCode(on: req.db, code: hashedCode) else {
-            return try accessTokenError(req: req, statusCode: .unauthorized, error: .invalidGrant, description: "Missing or invalid code.")
+        // Extract auth code ID and code's body.
+        guard let codeData = requestParams.code.base64URLDecoded(),
+              let codeWithID = String(data: codeData, encoding: .utf8) else {
+            throw Abort(.badRequest)
+        }
+        let codeAndID = codeWithID.components(separatedBy: ":")
+        guard let id = UUID(uuidString: codeAndID[0]) else { throw Abort(.badRequest) }
+        let code = codeAndID[1]
+        
+        // Find auth code on database by id.
+        guard let authCode = try await AuthCodes.findByID(id: id, on: req.db) else {
+            return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidGrant, description: "Missing or invalid code.")
+        }
+        
+        guard try Bcrypt.verify(code, created: authCode.code) else {
+            return try accessTokenError(req: req, statusCode: .unauthorized, error: .invalidGrant, description: "Invalid code.")
         }
         
         // Check code_challenge
@@ -120,10 +133,27 @@ public class AccessTokenUtility {
     /// - Returns: The response with access-token.
     public func accessTokenFromRefreshToken<AccessTokens: AccessToken, RefreshTokens: RefreshToken>(req: Request, accessToken: AccessTokens.Type, refreshToken: RefreshTokens.Type) async throws -> Response {
         let requestParams = try req.content.decode(AccessTokenFromRefreshTokenRequest.self)
-        let hashedRefreshToken = SHA512.hash(data: Data(requestParams.refresh_token.utf8)).hexEncodedString()
-        guard let refreshToken = try await RefreshTokens.queryRefreshToken(hashedRefreshToken, on: req.db) else {
+        
+        // Extract refresh token ID and token's body.
+        guard let refreshTokenData = requestParams.refresh_token.base64URLDecoded(),
+              let refreshTokenWithID = String(data: refreshTokenData, encoding: .utf8) else {
+            throw Abort(.badRequest)
+        }
+        let refreshTokenAndID = refreshTokenWithID.components(separatedBy: ":")
+        guard let refreshTokenID = UUID(uuidString: refreshTokenAndID[0]) else {
+            throw Abort(.badRequest)
+        }
+        let givenRefreshToken = refreshTokenAndID[1]
+        
+        // Find refresh token on database by id.
+        guard let refreshToken = try await RefreshTokens.findByID(id: refreshTokenID, on: req.db) else {
             return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidRequest, description: "Invalid refresh_token")
         }
+        
+        guard try Bcrypt.verify(givenRefreshToken, created: refreshToken.refreshToken) else {
+            return try accessTokenError(req: req, statusCode: .unauthorized, error: .invalidRequest, description: "Invalid refresh token.")
+        }
+        
         if refreshToken.isRevoked {
             return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidRequest, description: "refresh_token is revoked.")
         }
@@ -155,11 +185,17 @@ public class AccessTokenUtility {
     private func buildAccessTokens
     <AccessTokens: AccessToken, RefreshTokens: RefreshToken>
     (req: Request, userID: AccessTokens.User.IDValue, clientID: OAuthClients.IDValue, scopes: [OAuthScopes]) async throws -> (AccessTokenResponse, AccessTokens, RefreshTokens) {
-        let (oauthAccessToken, accessToken, expiresIn): (AccessTokens, String, Int) = generateAccessToken(userID: userID, clientID: clientID)
+        let (oauthAccessToken, rawAccessToken, expiresIn): (AccessTokens, String, Int) = try generateAccessToken(userID: userID, clientID: clientID)
         try await oauthAccessToken.save(on: req.db)
         
-        let (oauthRefreshToken, refreshToken): (RefreshTokens, String) = try generateRefreshToken(accessToken: oauthAccessToken, userID: userID, clientID: clientID)
+        let accessTokenWithID = "\(oauthAccessToken.id!.uuidString):\(rawAccessToken)"
+        let accessToken = Data(accessTokenWithID.utf8).base64URLEncodedString()
+        
+        let (oauthRefreshToken, rawRefreshToken): (RefreshTokens, String) = try generateRefreshToken(accessToken: oauthAccessToken, userID: userID, clientID: clientID)
         try await oauthRefreshToken.save(on: req.db)
+        
+        let refreshTokenWithID = "\(oauthRefreshToken.id!.uuidString):\(rawRefreshToken)"
+        let refreshToken = Data(refreshTokenWithID.utf8).base64URLEncodedString()
         
         try await oauthAccessToken.setScope(scopes, on: req.db)
         try await oauthRefreshToken.setScopes(scopes, on: req.db)
@@ -175,18 +211,18 @@ public class AccessTokenUtility {
         return (accessTokenResponse, oauthAccessToken, oauthRefreshToken)
     }
     
-    private func generateAccessToken<AccessTokens: AccessToken>(userID: AccessTokens.User.IDValue,clientID: UUID) -> (AccessTokens, String, Int) {
-        let accessToken = [UInt8].random(count: 64).base64.replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
+    private func generateAccessToken<AccessTokens: AccessToken>(userID: AccessTokens.User.IDValue,clientID: UUID) throws -> (AccessTokens, String, Int) {
+        let accessToken = Data([UInt8].random(count: 64)).base64URLEncodedString()
         let expiresIn = 60 * 60
         let expired = Date().addingTimeInterval(TimeInterval(expiresIn))
         
-        let oauthAccessToken = AccessTokens(expired: expired, accessToken: accessToken, userID: userID, clientID: clientID)
+        let oauthAccessToken = try AccessTokens(expired: expired, accessToken: accessToken, userID: userID, clientID: clientID)
         return (oauthAccessToken, accessToken, expiresIn)
     }
     
     private func generateRefreshToken<AccessTokens: AccessToken, RefreshTokens: RefreshToken>
     (accessToken: AccessTokens, userID: AccessTokens.User.IDValue, clientID: UUID) throws -> (RefreshTokens, String) {
-        let refreshToken = [UInt8].random(count: 64).base64.replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
+        let refreshToken = Data([UInt8].random(count: 64)).base64URLEncodedString()
         let expiresIn = 60 * 60 * 24 * 7
         let expired = Date().addingTimeInterval(TimeInterval(expiresIn))
         

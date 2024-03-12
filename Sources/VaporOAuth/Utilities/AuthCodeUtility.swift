@@ -107,9 +107,12 @@ public class AuthCodeUtility {
         }
         
         // Generate authorization code and save it.
-        let (oauthAuthorizationCode, authCode): (AuthCodes, String) = try generateAuthorizationCode(userID: user.requireID(), clientID: client.requireID(), redirectURI: redirectURI, codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
+        let (oauthAuthorizationCode, code): (AuthCodes, String) = try generateAuthorizationCode(userID: user.requireID(), clientID: client.requireID(), redirectURI: redirectURI, codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod)
         try await oauthAuthorizationCode.save(on: req.db)
         try await oauthAuthorizationCode.setScopes(scopes, on: req.db)
+        
+        let codeWithID = "\(oauthAuthorizationCode.id!.uuidString):\(code)"
+        let authCode = Data(codeWithID.utf8).base64URLEncodedString()
         
         // Redirect user with query parameters which contain authorization code and state.
         let authCodeResponse = AuthCodeResponse(code: authCode, state: state)
@@ -144,15 +147,32 @@ public class AuthCodeUtility {
                                                                          redirectURI: String,
                                                                          codeChallenge: String,
                                                                          codeChallengeMethod: String) throws -> (AuthCodes, String) {
-        let code = [UInt8].random(count: 64).base64.replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
+        let code = Data([UInt8].random(count: 64)).base64URLEncodedString()
         guard let expiresDate = Calendar.current.date(byAdding: .minute, value: 3, to: Date()) else {
             throw Abort(.internalServerError, reason: "Couldn't get expires date.")
         }
-        let authCodes = AuthCodes(expired: expiresDate, code: code, redirectURI: redirectURI,codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod, clientID: clientID, userID: userID)
+        let authCodes = try AuthCodes(expired: expiresDate, code: code, redirectURI: redirectURI,codeChallenge: codeChallenge, codeChallengeMethod: codeChallengeMethod, clientID: clientID, userID: userID)
         return (authCodes, code)
     }
-    
-    
+}
+
+extension Data {
+    func base64URLEncodedString() -> String {
+        let base64 = self.base64EncodedString()
+        let base64URL = base64.replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
+        return base64URL
+    }
+}
+
+extension String {
+    func base64URLDecoded() -> Data? {
+        let stringToBeEncoded = self.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+        
+        let remainder = self.count % 4
+        let paddingCount = remainder == 0 ? 0 : abs(remainder - 4)
+        let base64 = stringToBeEncoded + String(repeating: "=", count: paddingCount)
+        return Data(base64Encoded: base64)
+    }
 }
 
 struct AuthorizationRequest: Content {

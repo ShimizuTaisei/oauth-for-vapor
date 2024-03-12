@@ -11,7 +11,7 @@ import Fluent
 import Vapor
 
 /// A protocol that defines menbers for table which stores authorization codes.
-public protocol AuthorizationCode: Model {
+public protocol AuthorizationCode: Model where IDValue == UUID {
     /// The type of user table.
     associatedtype User: Model, Authenticatable
     
@@ -43,7 +43,7 @@ public protocol AuthorizationCode: Model {
     ///   - clientID: The ID of client which is related to this record.
     ///   - userID: The ID of user which is related to this table.
     init(expired: Date, code: String, redirectURI: String, codeChallenge: String, codeChallengeMethod: String,
-         clientID: UUID, userID: User.IDValue)
+         clientID: UUID, userID: User.IDValue) throws
     
     /// Set list of scopes to this record.
     /// - Parameters:
@@ -75,4 +75,11 @@ public protocol AuthorizationCode: Model {
     /// - Parameter database: The database object
     /// - Returns: The list of authorization code which is expected to delete.
     static func forDelete(on database: Database) async throws -> [Self]
+    
+    /// Find instance of class which conforms to ``AuthorizationCode`` by given id with eager loading.
+    /// - Parameters:
+    ///   - id: The id for query.
+    ///   - database: Database.
+    /// - Returns: The query result that is instance of class which conforms to ``AuthorizationCode``.
+    static func findByID(id: UUID, on database: Database) async throws -> Self?
 }

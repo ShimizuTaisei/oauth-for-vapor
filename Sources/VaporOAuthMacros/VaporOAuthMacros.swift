@@ -14,6 +14,10 @@ import SwiftSyntaxMacros
 // MARK: - AccessTokens
 public struct AccessTokenModelMacro: MemberMacro {
     public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingMembersOf declaration: some SwiftSyntax.DeclGroupSyntax, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
+        guard let decl = declaration.as(ClassDeclSyntax.self) else {
+            return []
+        }
+        let name = decl.name.text
         return [
             """
             @ID(key: .id)
@@ -52,10 +56,10 @@ public struct AccessTokenModelMacro: MemberMacro {
             public var scopes: [OAuthScopes]
             """,
             """
-            public init(expired: Date, accessToken: String, userID: User.IDValue, clientID: OAuthClients.IDValue) {
+            public init(expired: Date, accessToken: String, userID: User.IDValue, clientID: OAuthClients.IDValue) throws {
                 self.expired = expired
                 self.isRevoked = false
-                self.accessToken = SHA512.hash(data: Data(accessToken.utf8)).hexEncodedString()
+                self.accessToken = try Bcrypt.hash(accessToken)
                 self.$user.id = userID
                 self.$client.id = clientID
             }
@@ -74,11 +78,17 @@ public struct AccessTokenModelMacro: MemberMacro {
             /// Return revoked tokens to delete.
             /// - Parameter database: Database.
             /// - Returns: The list of revoked or expired tokens.
-            public static func forDelete(on database: Database) async throws -> [AccessTokens] {
-                let revokedAccessTokens = try await AccessTokens.query(on: database).group(.or) { group in
+            public static func forDelete(on database: Database) async throws -> [\(raw: name)] {
+                let revokedAccessTokens = try await \(raw: name).query(on: database).group(.or) { group in
                     group.filter(\\.$isRevoked == true).filter(\\.$expired < Date())
                 }.withDeleted().all()
                 return revokedAccessTokens
+            }
+            """,
+            """
+            public static func findByID(id: UUID, on database: Database) async throws -> \(raw: name)? {
+                let accessToken = try await \(raw: name).query(on: database).filter(\\.$id == id).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
+                return accessToken
             }
             """,
         ]
@@ -187,11 +197,11 @@ public struct AuthorizationCodeModelMacro: MemberMacro {
             public var scopes: [OAuthScopes]
             """,
             """
-            public init(expired: Date, code: String, redirectURI: String, codeChallenge: String, codeChallengeMethod: String, clientID: UUID, userID: UUID) {
+            public init(expired: Date, code: String, redirectURI: String, codeChallenge: String, codeChallengeMethod: String, clientID: UUID, userID: UUID) throws {
                 self.expired = expired
                 self.isRevoked = false
                 self.isUsed = false
-                self.code = SHA512.hash(data: Data(code.utf8)).hexEncodedString()
+                self.code = try Bcrypt.hash(code)
                 self.redirectURI = redirectURI
                 self.codeChallenge = codeChallenge
                 self.codeChallengeMethod = codeChallengeMethod
@@ -231,11 +241,17 @@ public struct AuthorizationCodeModelMacro: MemberMacro {
             /// Return revoked codes to delete.
             /// - Parameter database: Database.
             /// - Returns: The list of revoked or expired codes.
-            public static func forDelete(on database: Database) async throws -> [AuthorizationCodes] {
-                let revokedAuthCodes = try await AuthorizationCodes.query(on: database).group(.or) { group in
+            public static func forDelete(on database: Database) async throws -> [\(raw: name)] {
+                let revokedAuthCodes = try await \(raw: name).query(on: database).group(.or) { group in
                     group.filter(\\.$isRevoked == true).filter(\\.$expired < Date())
                 }.withDeleted().all()
                 return revokedAuthCodes
+            }
+            """,
+            """
+            public static func findByID(id: UUID, on database: Database) async throws -> \(raw: name)? {
+                let authCode = try await \(raw: name).query(on: database).filter(\\.$id == id).with(\\.$user).with(\\.$scopes).first()
+                return authCode
             }
             """,
         ]
@@ -322,10 +338,10 @@ public struct RefreshTokenModelMacro: MemberMacro {
             public var scopes: [OAuthScopes]
             """,
             """
-            public init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID) {
+            public init(expired: Date, refreshToken: String, accessTokenID: UUID, userID: User.IDValue, clientID: UUID) throws {
                 self.expired = expired
                 self.isRevoked = false
-                self.refreshToken = SHA512.hash(data: Data(refreshToken.utf8)).hexEncodedString()
+                self.refreshToken = try Bcrypt.hash(refreshToken)
                 self.$accessToken.id = accessTokenID
                 self.$user.id = userID
                 self.$client.id = clientID
@@ -351,11 +367,17 @@ public struct RefreshTokenModelMacro: MemberMacro {
             /// Return revoked tokens to delete.
             /// - Parameter database: Database.
             /// - Returns: The list of revoked or expired tokens.
-            public static func forDelete(on database: Database) async throws -> [RefreshTokens] {
-                let revokedRefreshTokens = try await RefreshTokens.query(on: database).group(.or) { group in
+            public static func forDelete(on database: Database) async throws -> [\(raw: name)] {
+                let revokedRefreshTokens = try await \(raw: name).query(on: database).group(.or) { group in
                     group.filter(\\.$isRevoked == true).filter(\\.$expired < Date())
                 }.withDeleted().all()
                 return revokedRefreshTokens
+            }
+            """,
+            """
+            public static func findByID(id: UUID, on database: Database) async throws -> \(raw: name)? {
+                let refreshToken = try await \(raw: name).query(on: database).filter(\\.$id == id).with(\\.$accessToken).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
+                return refreshToken
             }
             """,
         ]

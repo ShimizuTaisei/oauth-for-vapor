@@ -15,6 +15,8 @@ public protocol AuthorizationCode: Model where IDValue == UUID {
     /// The type of user table.
     associatedtype User: Model, Authenticatable
     
+    associatedtype AuthorizationCodeScopeType: AuthorizationCodeScope
+    
     /// The type of access token table. It should be conform to ``AccessToken``.
     associatedtype AccessTokenType: AccessToken
     

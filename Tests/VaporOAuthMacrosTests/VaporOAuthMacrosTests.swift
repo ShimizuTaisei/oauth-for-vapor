@@ -134,6 +134,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public static var schema: String = "oauth_authorization_codes"
             
             public typealias User = Users
+            public typealias AuthorizationCodeScopeType = AuthorizationCodeScopes
             public typealias AccessTokenType = AccessTokens
             public typealias RefreshTokenType = RefreshTokens
         }
@@ -142,6 +143,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public static var schema: String = "oauth_authorization_codes"
             
             public typealias User = Users
+            public typealias AuthorizationCodeScopeType = AuthorizationCodeScopes
             public typealias AccessTokenType = AccessTokens
             public typealias RefreshTokenType = RefreshTokens
 
@@ -285,6 +287,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public static var schema: String = "oauth_refresh_tokens"
 
             public typealias User = Users
+            public typealias RefreshTokenScopeType = RefreshTokenScopes
             public typealias AccessTokenType = AccessTokens
         }
         """, expandedSource: """
@@ -292,6 +295,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
             public static var schema: String = "oauth_refresh_tokens"
 
             public typealias User = Users
+            public typealias RefreshTokenScopeType = RefreshTokenScopes
             public typealias AccessTokenType = AccessTokens
 
             @ID(key: .id)

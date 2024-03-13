@@ -134,6 +134,31 @@ public struct AuthorizationCodeModelMacro: MemberMacro {
             return []
         }
         let name = decl.name.text
+
+        let typealiases = decl.memberBlock.members.compactMap { member in
+            return member.decl.as(TypeAliasDeclSyntax.self)
+        }
+        
+//        let userAlias = typealiases.first(where: { $0.name.text == "User" })
+//        let accessTokenAlias = typealiases.first(where: { $0.name.text == "AccessTokenType" })
+//        let refreshTokenAlias = typealiases.first(where: { $0.name.text == "RefreshTokenType" })
+//        
+//        let userSyntax = userAlias?.initializer.value.as(IdentifierTypeSyntax.self)
+//        let accessTokenSyntax = accessTokenAlias?.initializer.value.as(IdentifierTypeSyntax.self)
+//        let refreshTokenSyntax = refreshTokenAlias?.initializer.value.as(IdentifierTypeSyntax.self)
+//    
+//        guard let userTypeName = userSyntax?.name.text,
+//              let accessTokenName = accessTokenSyntax?.name.text,
+//              let refreshTokenName = refreshTokenSyntax?.name.text else {
+//            return []
+//        }
+        
+        let authorizationCodeScopeAlias = typealiases.first(where: { $0.name.text == "AuthorizationCodeScopeType" })
+        let authorizationCodeScopeSyntax = authorizationCodeScopeAlias?.initializer.value.as(IdentifierTypeSyntax.self)
+        guard let authorizationCodeScopeName = authorizationCodeScopeSyntax?.name.text else {
+            return []
+        }
+       
         
         return [
             """
@@ -193,7 +218,7 @@ public struct AuthorizationCodeModelMacro: MemberMacro {
             public var refreshToken: RefreshTokenType?
             """,
             """
-            @Siblings(through: AuthorizationCodeScopes.self, from: \\.$authorizationCode, to: \\.$scope)
+            @Siblings(through: \(raw: authorizationCodeScopeName).self, from: \\.$authorizationCode, to: \\.$scope)
             public var scopes: [OAuthScopes]
             """,
             """
@@ -296,6 +321,17 @@ public struct RefreshTokenModelMacro: MemberMacro {
             return []
         }
         let name = decl.name.text
+        
+        let typealiases = decl.memberBlock.members.compactMap { member in
+            return member.decl.as(TypeAliasDeclSyntax.self)
+        }
+        
+        let refreshTokenScopeAlias = typealiases.first(where: { $0.name.text == "RefreshTokenScopeType" })
+        let refreshTokenScopeSyntax = refreshTokenScopeAlias?.initializer.value.as(IdentifierTypeSyntax.self)
+        guard let refreshTokenScopeName = refreshTokenScopeSyntax?.name.text else {
+            return []
+        }
+        
         return [
             """
             @ID(key: .id)
@@ -334,7 +370,7 @@ public struct RefreshTokenModelMacro: MemberMacro {
             public var client: OAuthClients
             """,
             """
-            @Siblings(through: RefreshTokenScopes.self, from: \\.$refreshToken, to: \\.$scope)
+            @Siblings(through: \(raw: refreshTokenScopeName).self, from: \\.$refreshToken, to: \\.$scope)
             public var scopes: [OAuthScopes]
             """,
             """

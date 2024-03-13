@@ -14,6 +14,8 @@ public protocol RefreshToken: Model where IDValue == UUID {
     /// The type of user which is related to refresh token.
     associatedtype User: Model
     
+    associatedtype RefreshTokenScopeType: RefreshTokenScope
+    
     /// The type of access token which is refered from this table.
     associatedtype AccessTokenType: AccessToken
     

@@ -412,7 +412,7 @@ public struct RefreshTokenModelMacro: MemberMacro {
             """,
             """
             public static func findByID(id: UUID, on database: Database) async throws -> \(raw: name)? {
-                let refreshToken = try await \(raw: name).query(on: database).filter(\\.$id == id).with(\\.$accessToken).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
+                let refreshToken = try await \(raw: name).query(on: database).filter(\\.$id == id).with(\\.$accessToken).with(\\.$user).with(\\.$client).with(\\.$scopes).withDeleted().first()
                 return refreshToken
             }
             """,

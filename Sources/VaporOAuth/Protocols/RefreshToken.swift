@@ -24,7 +24,7 @@ public protocol RefreshToken: Model where IDValue == UUID {
     var expired: Date? { get set }
     var isRevoked: Bool { get set }
     var refreshToken: String { get set }
-    var accessToken: AccessTokenType { get set }
+    var accessToken: AccessTokenType? { get set }
     var user: User { get set }
     var client: OAuthClients { get set }
     var scopes: [OAuthScopes] { get set }

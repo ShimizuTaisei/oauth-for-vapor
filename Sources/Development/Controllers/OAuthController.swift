@@ -49,10 +49,10 @@ struct OAuthController: RouteCollection {
         let grantType = try req.content.decode(AccessTokenRequest.self).grant_type
         switch grantType {
         case "authorization_code":
-            return try await AccessTokenUtility().accessTokenFromAuthCode(req: req, authCode: AuthorizationCodes.self, accessToken: AccessTokens.self, refreshToken: RefreshTokens.self)
+            return try await AccessTokenUtility(accessTokenExpiredIn: 60*60, refreshTokenExpiredIn: 60*60*24*7).accessTokenFromAuthCode(req: req, authCode: AuthorizationCodes.self, accessToken: AccessTokens.self, refreshToken: RefreshTokens.self)
             
         case "refresh_token":
-            return try await AccessTokenUtility().accessTokenFromRefreshToken(req: req, accessToken: AccessTokens.self, refreshToken: RefreshTokens.self)
+            return try await AccessTokenUtility(accessTokenExpiredIn: 60*60, refreshTokenExpiredIn: 60*60*24*7).accessTokenFromRefreshToken(req: req, accessToken: AccessTokens.self, refreshToken: RefreshTokens.self)
             
         default:
             throw Abort(.badRequest, reason: "Unknown grant_type.")

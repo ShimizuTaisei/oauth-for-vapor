@@ -358,8 +358,8 @@ public struct RefreshTokenModelMacro: MemberMacro {
             public var refreshToken: String
             """,
             """
-            @Parent(key: "access_token_id")
-            public var accessToken: AccessTokenType
+            @OptionalParent(key: "access_token_id")
+            public var accessToken: AccessTokenType?
             """,
             """
             @Parent(key: "user_id")
@@ -412,7 +412,7 @@ public struct RefreshTokenModelMacro: MemberMacro {
             """,
             """
             public static func findByID(id: UUID, on database: Database) async throws -> \(raw: name)? {
-                let refreshToken = try await \(raw: name).query(on: database).filter(\\.$id == id).with(\\.$accessToken).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
+                let refreshToken = try await \(raw: name).query(on: database).filter(\\.$id == id).with(\\.$accessToken, withDeleted: true).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
                 return refreshToken
             }
             """,

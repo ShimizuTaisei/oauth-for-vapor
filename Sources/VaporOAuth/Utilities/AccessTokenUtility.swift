@@ -12,7 +12,12 @@ import Fluent
 import Crypto
 
 public class AccessTokenUtility {
-    public init() {}
+    let accessTokenExpiredIn: Int
+    let refreshTokenExpiredIn: Int
+    public init(accessTokenExpiredIn: UInt, refreshTokenExpiredIn: UInt) {
+        self.accessTokenExpiredIn = Int(accessTokenExpiredIn)
+        self.refreshTokenExpiredIn = Int(refreshTokenExpiredIn)
+    }
     
     /// Issue access token based on authorization code.
     /// - Parameters:
@@ -167,11 +172,12 @@ public class AccessTokenUtility {
         let (response, _, _): (AccessTokenResponse, AccessTokens, RefreshTokens) = try await buildAccessTokens(req: req, userID: refreshToken.user.requireID() as! AccessTokens.User.IDValue, clientID: refreshToken.client.requireID(), scopes: refreshToken.scopes)
         
         // Revoke previous access token.
-        let oldAccessToken = refreshToken.accessToken
-        oldAccessToken.isRevoked = true
-        oldAccessToken.expired = Date()
-        try await oldAccessToken.save(on: req.db)
-        
+        if let oldAccessToken = refreshToken.accessToken {
+            oldAccessToken.isRevoked = true
+            oldAccessToken.expired = Date()
+            try await oldAccessToken.save(on: req.db)
+        }
+
         // Revoke previous refresh token.
         refreshToken.isRevoked = true
         refreshToken.expired = Date()
@@ -213,18 +219,16 @@ public class AccessTokenUtility {
     
     private func generateAccessToken<AccessTokens: AccessToken>(userID: AccessTokens.User.IDValue,clientID: UUID) throws -> (AccessTokens, String, Int) {
         let accessToken = Data([UInt8].random(count: 64)).base64URLEncodedString()
-        let expiresIn = 60 * 60
-        let expired = Date().addingTimeInterval(TimeInterval(expiresIn))
+        let expired = Date().addingTimeInterval(TimeInterval(accessTokenExpiredIn))
         
         let oauthAccessToken = try AccessTokens(expired: expired, accessToken: accessToken, userID: userID, clientID: clientID)
-        return (oauthAccessToken, accessToken, expiresIn)
+        return (oauthAccessToken, accessToken, accessTokenExpiredIn)
     }
     
     private func generateRefreshToken<AccessTokens: AccessToken, RefreshTokens: RefreshToken>
     (accessToken: AccessTokens, userID: AccessTokens.User.IDValue, clientID: UUID) throws -> (RefreshTokens, String) {
         let refreshToken = Data([UInt8].random(count: 64)).base64URLEncodedString()
-        let expiresIn = 60 * 60 * 24 * 7
-        let expired = Date().addingTimeInterval(TimeInterval(expiresIn))
+        let expired = Date().addingTimeInterval(TimeInterval(refreshTokenExpiredIn))
         
         let oauthRefreshToken = try RefreshTokens(expired: expired, refreshToken: refreshToken, accessTokenID: accessToken.requireID(), userID: userID as! RefreshTokens.User.IDValue, clientID: clientID)
         return (oauthRefreshToken, refreshToken)

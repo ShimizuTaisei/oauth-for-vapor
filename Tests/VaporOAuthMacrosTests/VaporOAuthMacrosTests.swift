@@ -316,8 +316,8 @@ final class VaporOAuthMacrosTests: XCTestCase {
             @Field(key: "refresh_token")
             public var refreshToken: String
 
-            @Parent(key: "access_token_id")
-            public var accessToken: AccessTokenType
+            @OptionalParent(key: "access_token_id")
+            public var accessToken: AccessTokenType?
 
             @Parent(key: "user_id")
             public var user: User

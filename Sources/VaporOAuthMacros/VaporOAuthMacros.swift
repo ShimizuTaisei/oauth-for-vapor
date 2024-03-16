@@ -358,8 +358,8 @@ public struct RefreshTokenModelMacro: MemberMacro {
             public var refreshToken: String
             """,
             """
-            @Parent(key: "access_token_id")
-            public var accessToken: AccessTokenType
+            @OptionalParent(key: "access_token_id")
+            public var accessToken: AccessTokenType?
             """,
             """
             @Parent(key: "user_id")

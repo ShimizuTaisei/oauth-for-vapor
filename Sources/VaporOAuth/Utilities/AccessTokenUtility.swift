@@ -167,11 +167,12 @@ public class AccessTokenUtility {
         let (response, _, _): (AccessTokenResponse, AccessTokens, RefreshTokens) = try await buildAccessTokens(req: req, userID: refreshToken.user.requireID() as! AccessTokens.User.IDValue, clientID: refreshToken.client.requireID(), scopes: refreshToken.scopes)
         
         // Revoke previous access token.
-        let oldAccessToken = refreshToken.accessToken
-        oldAccessToken.isRevoked = true
-        oldAccessToken.expired = Date()
-        try await oldAccessToken.save(on: req.db)
-        
+        if let oldAccessToken = refreshToken.accessToken {
+            oldAccessToken.isRevoked = true
+            oldAccessToken.expired = Date()
+            try await oldAccessToken.save(on: req.db)
+        }
+
         // Revoke previous refresh token.
         refreshToken.isRevoked = true
         refreshToken.expired = Date()

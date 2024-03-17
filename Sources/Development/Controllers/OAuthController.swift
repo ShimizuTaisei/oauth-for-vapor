@@ -31,7 +31,8 @@ struct OAuthController: RouteCollection {
     
     // MARK: - GET /oauth/login/
     func getLoginForm(req: Request) async throws -> View {
-        return try await req.view.render("loginForm", ["action": "/oauth/login/"])
+        let missing = try? req.query.get(String.self, at: "m")
+        return try await req.view.render("loginForm", ["action": "/oauth/login/", "missing": missing ?? "n"])
     }
     
     // MARK: - POST /oauth/login/
@@ -39,7 +40,7 @@ struct OAuthController: RouteCollection {
         do {
             let _ = try req.auth.require(Users.self)
         } catch {
-            return req.redirect(to: "/oauth/login/", redirectType: .normal)
+            return req.redirect(to: "/oauth/login/?m=y", redirectType: .normal)
         }
         return try await AuthCodeUtility().issueAuthCode(req: req, type: AuthorizationCodes.self)
     }

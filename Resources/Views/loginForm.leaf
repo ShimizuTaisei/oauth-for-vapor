@@ -1,20 +1,33 @@
 <!DOCTYPE html>
 <html lang="ja">
-    <head>
-        <meta charset="UTF-8">
-        <title>教員ログイン</title>
-    </head>
 
-    <body>
-    #if(missing == "y"):
+<head>
+    <meta charset="UTF-8">
+    <title>教員ログイン</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/styles/style.css">
+</head>
+
+<body>
+    <div class="main">
+        <div class="header_space"></div>
+        #if(missing == "y"):
         <p style="color: red;">ログインIDまたはパスワードが違います。</p>
-    #endif
+        #endif
         <form method="POST" action="#(action)">
-            <label for="loginID">Login ID</label>
-            <input type="text" id="loginID" placeholder="Login ID", name="username" autocomplete="username", required autofocus>
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Password" name="password" autocomplete="current-password" required>
-            <input type="submit" value="Sign In">
+            <fieldset>
+                <!-- <legend>Login</legend> -->
+                <label for="loginID">Login ID</label>
+                <input type="text" id="loginID" placeholder="Login ID" , name="username" autocomplete="username" , required
+                    autofocus>
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Password" name="password" autocomplete="current-password"
+                    required>
+                <input type="submit" value="Sign In">
+            </fieldset>
         </form>
-    </body>
+    </div>
+
+</body>
+
 </html>

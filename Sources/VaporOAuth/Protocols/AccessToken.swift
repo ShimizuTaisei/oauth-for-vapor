@@ -49,5 +49,5 @@ public protocol AccessToken: Model where IDValue == UUID {
     ///   - id: The ID of token to search database.
     ///   - database: Database.
     /// - Returns: The query result.
-    static func findByID(id: UUID, on database: Database) async throws -> Self?
+    static func findByID(id: UUID, on database: Database, withDeleted: Bool) async throws -> Self?
 }

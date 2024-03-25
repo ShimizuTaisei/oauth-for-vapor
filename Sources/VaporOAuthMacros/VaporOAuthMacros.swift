@@ -86,12 +86,12 @@ public struct AccessTokenModelMacro: MemberMacro {
             }
             """,
             """
-            public static func findByID(id: UUID, on database: any FluentKit.Database, withDeleted: Bool) async throws -> AccessTokens? {
+            public static func findByID(id: UUID, on database: any FluentKit.Database, withDeleted: Bool) async throws -> \(raw: name)? {
                 if withDeleted {
-                    let accessToken = try await AccessTokens.query(on: database).filter(\\.$id == id).with(\\.$user).with(\\.$client).with(\\.$scopes).withDeleted().first()
+                    let accessToken = try await \(raw: name).query(on: database).filter(\\.$id == id).with(\\.$user).with(\\.$client).with(\\.$scopes).withDeleted().first()
                     return accessToken
                 } else {
-                    let accessToken = try await AccessTokens.query(on: database).filter(\\.$id == id).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
+                    let accessToken = try await \(raw: name).query(on: database).filter(\\.$id == id).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
                     return accessToken
                 }
             }

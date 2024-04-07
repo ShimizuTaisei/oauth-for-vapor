@@ -14,13 +14,22 @@ public struct CreateOAuthAuthorizationCodeScopes: AsyncMigration {
     public var name: String
     var authCodeTableName: String
     
+    
     ///
     /// - Parameters:
     ///   - schema: The name of table to create.
     ///   - authCodeTableName: The name of authorization-code table which is refered from this table.
+    @available(*, deprecated, renamed: "init", message: "Depricated in oauth-for-vapor v0.2.0\nUse init(_ configuration: OAuthMigrationConfiguration)")
     public init(_ schema: String = "oauth_authorization_code_scopes", authCodeTableName: String = "oauth_authorization_codes") {
         self.name = schema
         self.authCodeTableName = authCodeTableName
+    }
+    
+    /// Initializer.
+    /// - Parameter configurations: The configuration object which contain informations about OAuth tables.
+    public init(_ configurations: OAuthMigrationConfiguration) {
+        self.name = configurations.authorizationCodeScopesScheme
+        self.authCodeTableName = configurations.authorizationCodesScheme
     }
     
     public func prepare(on database: Database) async throws {

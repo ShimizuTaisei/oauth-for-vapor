@@ -25,13 +25,24 @@ public struct CreateOAuthAuthorizationCodes: AsyncMigration {
     ///   - userTableIdFiled: The name of field which contain user id.
     ///   - accessTokenTableName: The name of access-token table which is refered from this table.
     ///   - refreshTokenTableName: The name of refresh-token table which is refered from this table.
+    @available(*, deprecated, renamed: "init", message: "Depricated in oauth-for-vapor v0.2.0\nUse init(_ configuration: OAuthMigrationConfiguration)")
     public init(_ schema: String = "oauth_authorization_codes", userTableName: String, userTableIdFiled: FieldKey,
-         accessTokenTableName: String = "oauth_access_tokens", refreshTokenTableName: String = "oauth_refresh_tokens") {
+                accessTokenTableName: String = "oauth_access_tokens", refreshTokenTableName: String = "oauth_refresh_tokens") {
         self.name = schema
         self.userTableName = userTableName
         self.userTableIdFiled = userTableIdFiled
         self.accessTokenTableName = accessTokenTableName
         self.refreshTokenTableName = refreshTokenTableName
+    }
+    
+    /// Initializer.
+    /// - Parameter configurations: The configuration object which contain informations about OAuth tables.
+    public init(_ configurations: OAuthMigrationConfiguration) {
+        self.name = configurations.authorizationCodesScheme
+        self.userTableName = configurations.usersScheme
+        self.userTableIdFiled = configurations.usersIDFieldKey
+        self.accessTokenTableName = configurations.accessTokensScheme
+        self.refreshTokenTableName = configurations.refreshTokensScheme
     }
     
     public func prepare(on database: Database) async throws {

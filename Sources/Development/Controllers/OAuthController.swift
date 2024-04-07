@@ -31,7 +31,8 @@ struct OAuthController: RouteCollection {
     
     // MARK: - GET /oauth/login/
     func getLoginForm(req: Request) async throws -> View {
-        return try await req.view.render("loginForm", ["action": "/oauth/login/"])
+        let missing = try? req.query.get(String.self, at: "m")
+        return try await req.view.render("loginForm", ["action": "/oauth/login/", "missing": missing ?? "n"])
     }
     
     // MARK: - POST /oauth/login/
@@ -39,7 +40,7 @@ struct OAuthController: RouteCollection {
         do {
             let _ = try req.auth.require(Users.self)
         } catch {
-            return req.redirect(to: "/oauth/login/", redirectType: .normal)
+            return req.redirect(to: "/oauth/login/?m=y", redirectType: .normal)
         }
         return try await AuthCodeUtility().issueAuthCode(req: req, type: AuthorizationCodes.self)
     }
@@ -49,10 +50,10 @@ struct OAuthController: RouteCollection {
         let grantType = try req.content.decode(AccessTokenRequest.self).grant_type
         switch grantType {
         case "authorization_code":
-            return try await AccessTokenUtility(accessTokenExpiredIn: 60*60, refreshTokenExpiredIn: 60*60*24*7).accessTokenFromAuthCode(req: req, authCode: AuthorizationCodes.self, accessToken: AccessTokens.self, refreshToken: RefreshTokens.self)
+            return try await AccessTokenUtility(accessTokenExpiredIn: 10, refreshTokenExpiredIn: 60*60*24*7).accessTokenFromAuthCode(req: req, authCode: AuthorizationCodes.self, accessToken: AccessTokens.self, refreshToken: RefreshTokens.self)
             
         case "refresh_token":
-            return try await AccessTokenUtility(accessTokenExpiredIn: 60*60, refreshTokenExpiredIn: 60*60*24*7).accessTokenFromRefreshToken(req: req, accessToken: AccessTokens.self, refreshToken: RefreshTokens.self)
+            return try await AccessTokenUtility(accessTokenExpiredIn: 10, refreshTokenExpiredIn: 60*60*24*7).accessTokenFromRefreshToken(req: req, accessToken: AccessTokens.self, refreshToken: RefreshTokens.self)
             
         default:
             throw Abort(.badRequest, reason: "Unknown grant_type.")

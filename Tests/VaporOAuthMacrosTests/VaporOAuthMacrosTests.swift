@@ -82,9 +82,14 @@ final class VaporOAuthMacrosTests: XCTestCase {
                 return revokedAccessTokens
             }
 
-            public static func findByID(id: UUID, on database: Database) async throws -> AccessTokens? {
-                let accessToken = try await AccessTokens.query(on: database).filter(\\.$id == id).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
-                return accessToken
+            public static func findByID(id: UUID, on database: any FluentKit.Database, withDeleted: Bool) async throws -> AccessTokens? {
+                if withDeleted {
+                    let accessToken = try await AccessTokens.query(on: database).filter(\\.$id == id).with(\\.$user).with(\\.$client).with(\\.$scopes).withDeleted().first()
+                    return accessToken
+                } else {
+                    let accessToken = try await AccessTokens.query(on: database).filter(\\.$id == id).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
+                    return accessToken
+                }
             }
         }
         """

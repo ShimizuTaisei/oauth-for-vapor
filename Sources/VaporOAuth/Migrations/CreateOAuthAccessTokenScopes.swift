@@ -27,7 +27,7 @@ public struct CreateOAuthAccessTokenScopes: AsyncMigration {
         try await database.schema(self.name)
             .id()
             .field("access_token_id", .uuid, .required, .references(self.accessTokenTableName, "id", onDelete: .cascade))
-            .field("scope_id", .uuid, .required, .references("oauth_scopes", "id"))
+            .field("scope_id", .uuid, .required, .references("oauth_scopes", "id", onDelete: .restrict))
             .unique(on: "access_token_id", "scope_id")
             .create()
     }

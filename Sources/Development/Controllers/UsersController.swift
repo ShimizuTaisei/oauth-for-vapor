@@ -33,11 +33,18 @@ struct UsersController: RouteCollection {
     }
     
     func getLoginForm(req: Request) async throws -> View {
-        return try await req.view.render("loginForm", ["action": "/users/login/"])
+        let missing = try? req.query.get(String.self, at: "m")
+        return try await req.view.render("loginForm", ["action": "/users/login/", "missing": missing ?? "n"])
     }
     
-    func postLoginForm(req: Request) async throws -> Users {
-        return try req.auth.require(Users.self)
+    func postLoginForm(req: Request) async throws -> Response {
+        do {
+            let user = try req.auth.require(Users.self)
+            let response = Response(status: .ok, body: Response.Body(data: try JSONEncoder().encode(user)))
+            return response
+        } catch {
+            return req.redirect(to: "/users/login/?m=y", redirectType: .normal)
+        }
     }
     
     func getRegisterForm(req: Request) async throws -> View {

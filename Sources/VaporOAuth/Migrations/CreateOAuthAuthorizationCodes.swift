@@ -46,10 +46,11 @@ public struct CreateOAuthAuthorizationCodes: AsyncMigration {
             .field("redirect_uri", .string)
             .field("code_challenge", .string)
             .field("code_challenge_method", .string)
-            .field("client_id", .uuid, .required, .references("oauth_clients", "id"))
-            .field("user_id", .uuid, .required, .references(self.userTableName, userTableIdFiled))
+            .field("client_id", .uuid, .required, .references("oauth_clients", "id", onDelete: .cascade))
+            .field("user_id", .uuid, .required, .references(self.userTableName, userTableIdFiled, onDelete: .cascade))
             .field("access_token_id", .uuid, .references(self.accessTokenTableName, "id", onDelete: .cascade))
             .field("refresh_token_id", .uuid, .references(self.refreshTokenTableName, "id", onDelete: .cascade))
+            .unique(on: "code")
             .create()
     }
     

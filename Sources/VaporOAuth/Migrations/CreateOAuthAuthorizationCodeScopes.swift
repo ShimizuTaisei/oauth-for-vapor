@@ -27,7 +27,7 @@ public struct CreateOAuthAuthorizationCodeScopes: AsyncMigration {
         try await database.schema(self.name)
             .id()
             .field("authorization_code_id", .uuid, .required, .references(self.authCodeTableName, "id", onDelete: .cascade))
-            .field("scope_id", .uuid, .required, .references("oauth_scopes", "id"))
+            .field("scope_id", .uuid, .required, .references("oauth_scopes", "id", onDelete: .restrict))
             .unique(on: "authorization_code_id", "scope_id")
             .create()
     }

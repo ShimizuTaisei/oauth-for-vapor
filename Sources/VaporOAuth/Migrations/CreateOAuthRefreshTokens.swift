@@ -39,9 +39,9 @@ public struct CreateOAuthRefreshTokens: AsyncMigration {
             .field("expired", .string)
             .field("revoked", .bool)
             .field("refresh_token", .string, .required)
-            .field("access_token_id", .uuid, .references(self.accessTokenTableName, "id", onDelete: .cascade))
-            .field("user_id", .uuid, .required, .references(userTableName, userTableIdField))
-            .field("client_id", .uuid, .required, .references("oauth_clients", "id"))
+            .field("access_token_id", .uuid, .references(self.accessTokenTableName, "id", onDelete: .setNull))
+            .field("user_id", .uuid, .required, .references(userTableName, userTableIdField, onDelete: .cascade))
+            .field("client_id", .uuid, .required, .references("oauth_clients", "id", onDelete: .cascade))
             .unique(on: "refresh_token")
             .create()
     }

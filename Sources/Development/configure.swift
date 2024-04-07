@@ -37,15 +37,24 @@ public func configure(_ app: Application) async throws {
 
     app.views.use(.leaf)
     
-    app.migrations.add(CreateUsers())
+//    app.migrations.add(CreateUsers())
+    let oauthMigrationConfiguration = OAuthMigrationConfiguration(
+        usersScheme: "users",
+        authorizationCodesScheme: "oauth_authorization_codes",
+        authorizationCodeScopesScheme: "oauth_authorization_code_scopes",
+        accessTokensScheme: "oauth_access_tokens",
+        accessTokenScopesScheme: "oauth_access_token_scopes",
+        refreshTokensScheme: "oauth_refresh_tokens",
+        refreshTokenScopesScheme: "oauth_refresh_token_scopes")
+    
     app.migrations.add(CreateOAuthScopes())
     app.migrations.add(CreateOAuthClients())
-    app.migrations.add(CreateOAuthAccessTokens(userTableName: "users", userTableIdFiled: "id"))
-    app.migrations.add(CreateOAuthRefreshTokens(userTableName: "users", userTableIdField: "id"))
-    app.migrations.add(CreateOAuthAuthorizationCodes(userTableName: "users", userTableIdFiled: "id"))
-    app.migrations.add(CreateOAuthAccessTokenScopes())
-    app.migrations.add(CreateOAuthRefreshTokenScopes())
-    app.migrations.add(CreateOAuthAuthorizationCodeScopes())
+    app.migrations.add(CreateOAuthAccessTokens(oauthMigrationConfiguration))
+    app.migrations.add(CreateOAuthRefreshTokens(oauthMigrationConfiguration))
+    app.migrations.add(CreateOAuthAuthorizationCodes(oauthMigrationConfiguration))
+    app.migrations.add(CreateOAuthAccessTokenScopes(oauthMigrationConfiguration))
+    app.migrations.add(CreateOAuthRefreshTokenScopes(oauthMigrationConfiguration))
+    app.migrations.add(CreateOAuthAuthorizationCodeScopes(oauthMigrationConfiguration))
     
 //    app.queues.schedule(OAuthCleanDatabase<AuthorizationCodes, AccessTokens, RefreshTokens>())
 //        .daily()

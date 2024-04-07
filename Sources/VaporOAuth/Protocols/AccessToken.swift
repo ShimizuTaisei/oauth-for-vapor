@@ -7,12 +7,13 @@
 
 
 import Foundation
+import Vapor
 import Fluent
 
 /// A protocol that defines the members for table which stores access tokens.
 public protocol AccessToken: Model where IDValue == UUID {
     /// The type of user table.
-    associatedtype User: Model, ModelAuthenticatable
+    associatedtype User: Model, Authenticatable
     /// The type of access token scope table which you defined. It should conform to ``AccessTokenScope``.
     associatedtype AccessTokenScopeType: AccessTokenScope
     

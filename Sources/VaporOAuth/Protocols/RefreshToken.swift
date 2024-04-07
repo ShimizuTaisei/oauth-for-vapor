@@ -7,12 +7,13 @@
 
 
 import Foundation
+import Vapor
 import Fluent
 
 /// A protocol that defines members for table which stores refresh tokens.
 public protocol RefreshToken: Model where IDValue == UUID {
     /// The type of user which is related to refresh token.
-    associatedtype User: Model
+    associatedtype User: Model, Authenticatable
     
     associatedtype RefreshTokenScopeType: RefreshTokenScope
     

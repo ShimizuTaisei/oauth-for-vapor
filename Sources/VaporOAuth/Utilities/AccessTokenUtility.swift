@@ -72,8 +72,8 @@ public class AccessTokenUtility {
             
             guard codeChallenge == authCode.codeChallenge else {
                 #if DEBUG
-                print(codeChallenge.utf8.map({ $0 }))
-                print(authCode.codeChallenge.map({ $0 }))
+                print(codeChallenge.utf8.count)
+                print(authCode.codeChallenge.count)
                 #endif
                 return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidGrant, description: "Invalid code_verifier")
             }

@@ -66,6 +66,9 @@ public class AccessTokenUtility {
                 codeChallenge = codeVerifier
             case "S256":
                 codeChallenge = Data(SHA256.hash(data: codeVerifierData)).base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
+                #if DEBUG
+                print(codeChallenge)
+                #endif
             default:
                 throw Abort(.internalServerError)
             }

@@ -70,6 +70,10 @@ public class AccessTokenUtility {
                 throw Abort(.internalServerError)
             }
             
+            #if DEBUG
+            print(codeChallenge)
+            print(authCode.codeChallenge)
+            #endif
             guard codeChallenge == authCode.codeChallenge else {
                 return try accessTokenError(req: req, statusCode: .badRequest, error: .invalidGrant, description: "Invalid code_verifier")
             }

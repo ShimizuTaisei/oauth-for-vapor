@@ -14,47 +14,42 @@ import Crypto
 public class AuthCodeUtility {
     public init() {}
     
-    /// Validate authorization code request and create response for redirection to login form.
-    /// - Parameters:
-    ///   - req: Request object from route function.
-    ///   - redirectURI: The location where to redirect after request validation (such as login form).
-    /// - Returns: Redirect response.
-    public func validateAuthRequest(req: Request, redirectURI: String) async throws -> Response {
+    public func validateAuthRequest(req: Request) async throws -> AuthorizationCodeErrorResponse? {
         let queryParams = try req.query.decode(AuthorizationRequest.self)
         
         // Search client on database by given client_id.
         guard let clientUUID = UUID(uuidString: queryParams.client_id) else {
-            return try authCodeError(req: req, redirectURI: nil, isInvalidRedirectURI: true, state: queryParams.state, error: .invalidRequest, description: "Invalid client_id")
+            throw Abort(.badRequest, reason: "Invalid client.")
         }
         let client = try await OAuthClients.find(clientUUID, on: req.db)
         
         // Check whether redirect_uri is correct(Check whether given client_id is stored on client's record.).
         guard let _ = client?.redirectURIs.first(where: { $0 == queryParams.redirect_uri }) else {
-            return try authCodeError(req: req, redirectURI: nil, isInvalidRedirectURI: true, state: queryParams.state, error: .invalidRequest, description: "Invalid redirect_uri.")
+            throw Abort(.badRequest, reason: "Invalid redirect_uri")
         }
         
         // Check whether response_type is "code"
         guard queryParams.response_type == "code" else {
-            return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .unsupportedResponseType, description: "The \"response_type\" must be set to \"code\".")
+            return authCodeError(state: queryParams.state, error: .unsupportedResponseType, description: "The \"response_type\" must be set to \"code\".")
         }
         
         // Search database by given scopes parameter and make array of ``OAuthScopes``.
         let scopeStrings = queryParams.scope?.components(separatedBy: " ") ?? []
         guard let scopes = try? await OAuthScopes.query(on: req.db).filter(\.$name ~~ scopeStrings).all() else {
-            return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidScope, description: "Not found scope (DB query failed).")
+            return authCodeError(state: queryParams.state, error: .invalidScope, description: "Not found scope (DB query failed).")
         }
         
         // If array of ``OAuthScopes`` have no element, the error will be returned.
         guard scopes.count > 0 else {
-            return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidScope, description: "Not found scope (scope count is 0).")
+            return authCodeError(state: queryParams.state, error: .invalidScope, description: "Not found scope (scope count is 0).")
         }
         
         // The parameter code_challenge and code_challenge_method are requred.
         guard let codeChallenge = queryParams.code_challenge else {
-            return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidRequest, description: "Request must contain \"code_challenge\"")
+            return authCodeError(state: queryParams.state, error: .invalidRequest, description: "Request must contain \"code_challenge\"")
         }
         guard let codeChallengeMethod = queryParams.code_challenge_method else {
-            return try authCodeError(req: req, redirectURI: queryParams.redirect_uri, isInvalidRedirectURI: false, state: queryParams.state, error: .invalidRequest, description: "Request must contain \"code_challenge_method\"")
+            return authCodeError(state: queryParams.state, error: .invalidRequest, description: "Request must contain \"code_challenge_method\"")
         }
         
         // Store given parameters to session.
@@ -66,8 +61,22 @@ public class AuthCodeUtility {
         req.session.data["scope"] = queryParams.scope
         req.session.data["state"] = queryParams.state
         
-        // Then, redirect user to the uri, typically login form.
-        return req.redirect(to: redirectURI, redirectType: .normal)
+        return nil
+    }
+    
+    /// Validate authorization code request and create response for redirection to login form.
+    /// - Parameters:
+    ///   - req: Request object from route function.
+    ///   - redirectURI: The location where to redirect after request validation (such as login form).
+    /// - Returns: Redirect response.
+    public func validateAuthRequest(req: Request, redirectURI: String) async throws -> Response {
+        if let error = try await validateAuthRequest(req: req) {
+            let queryString = try URLEncodedFormEncoder().encode(error)
+            return req.redirect(to: "\(redirectURI)?\(queryString)")
+        } else {
+            // If the request is valied, redirect user to the uri, typically login form.
+            return req.redirect(to: redirectURI, redirectType: .normal)
+        }
     }
     
     /// Issue authorization code after login.
@@ -127,7 +136,7 @@ public class AuthCodeUtility {
         var state: String?
     }
     
-    private func authCodeError(req: Request, statusCode: HTTPResponseStatus = .badRequest, redirectURI: String?,
+    private func authCodeError(req: Request, redirectURI: String?,
                                     isInvalidRedirectURI: Bool, state: String?, error: AuthorizationCodeError, description: String? = nil, errorURI: String? = nil) throws -> Response {
         if isInvalidRedirectURI {
             throw Abort(.badRequest, reason: description ?? "Missing or invalid redirect_uri")
@@ -140,6 +149,11 @@ public class AuthCodeUtility {
                 throw Abort(.internalServerError, reason: "Error at redirection")
             }
         }
+    }
+    
+    private func authCodeError(state: String?, error: AuthorizationCodeError, description: String, errorURI: String? = nil) -> AuthorizationCodeErrorResponse {
+        let authCodeError = AuthorizationCodeErrorResponse(error: error.rawValue, error_description: description, error_uri: errorURI, state: state)
+        return authCodeError
     }
     
     private func generateAuthorizationCode<AuthCodes: AuthorizationCode>(userID: AuthCodes.User.IDValue,
@@ -185,7 +199,7 @@ struct AuthorizationRequest: Content {
     var state: String?
 }
 
-struct AuthorizationCodeErrorResponse: Content {
+public struct AuthorizationCodeErrorResponse: Content {
     var error: String
     var error_description: String?
     var error_uri: String?

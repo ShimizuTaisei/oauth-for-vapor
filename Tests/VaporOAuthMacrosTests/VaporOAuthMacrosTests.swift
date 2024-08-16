@@ -366,7 +366,7 @@ final class VaporOAuthMacrosTests: XCTestCase {
             }
         
             public static func findByID(id: UUID, on database: Database) async throws -> RefreshTokens? {
-                let refreshToken = try await RefreshTokens.query(on: database).filter(\\.$id == id).with(\\.$accessToken, withDeleted: true).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
+                let refreshToken = try await RefreshTokens.query(on: database).withDeleted().filter(\\.$id == id).with(\\.$accessToken, withDeleted: true).with(\\.$user).with(\\.$client).with(\\.$scopes).first()
                 return refreshToken
             }
         }
